@@ -17,6 +17,7 @@ import {
   type DashboardView,
 } from "@/components/dashboards/view-toggle";
 import { usePetition } from "@/hooks/use-petition";
+import { formatDateShort } from "@/lib/format-date";
 import { signatureFormatter } from "@/lib/format";
 import type { PetitionAttributes } from "@/lib/petitions-api";
 import type { PetitionHistorySample } from "@/hooks/use-petition";
@@ -32,23 +33,10 @@ interface DashboardSplitProps {
   view: DashboardView;
 }
 
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
-function formatDate(iso: string | null): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  return dateFormatter.format(d);
-}
-
 function PetitionByline({ attrs }: { attrs: PetitionAttributes }) {
   const isClosed = isPetitionClosed(attrs);
-  const closed = formatDate(attrs.closed_at);
-  const closing = formatDate(attrs.closing_date);
+  const closed = formatDateShort(attrs.closed_at);
+  const closing = formatDateShort(attrs.closing_date);
 
   const facts: string[] = [];
   if (attrs.creator_name) facts.push(`Created by ${attrs.creator_name}`);

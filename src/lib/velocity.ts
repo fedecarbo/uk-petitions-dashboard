@@ -25,12 +25,3 @@ export function velocityPerHour(
   const perMs = computeVelocityPerMs(history);
   return perMs === null ? null : perMs * 3_600_000;
 }
-
-export function windowSpanMinutes(
-  history: PetitionHistorySample[],
-): number {
-  if (history.length < 2) return 0;
-  const newest = history[history.length - 1];
-  const oldest = history[0];
-  return Math.max(0, Math.round((newest.t - oldest.t) / 60_000));
-}

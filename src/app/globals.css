@@ -40,6 +40,10 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
   --color-live: var(--live);
+  --color-status-live-bg: var(--status-live-bg);
+  --color-status-live-fg: var(--status-live-fg);
+  --color-status-neutral-bg: var(--status-neutral-bg);
+  --color-status-neutral-fg: var(--status-neutral-fg);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -66,6 +70,11 @@
   --accent-foreground: oklch(0.30 0.058 295);
   --destructive: oklch(0.560 0.221 28);
   --live: oklch(0.696 0.17 162.5);
+  /* GOV.UK status-tag colors — live (open / awaiting response / awaiting debate) and neutral (closed / rejected / debated / etc.) */
+  --status-live-bg: #cce2d8;
+  --status-live-fg: #006548;
+  --status-neutral-bg: #eeefef;
+  --status-neutral-fg: #383f43;
   --border: oklch(0.825 0.005 295);
   --input: oklch(0.825 0.005 295);
   --ring: oklch(0.853 0.084 170);
@@ -87,38 +96,44 @@
 
 .dark {
   /* Dark mode = the inverse of light: the title's dark purple becomes the page surface,
-     text flips to near-white, links/accent use white shades, mint is kept for focus only. */
+     text flips to near-white, links/accent use white shades, mint is kept for focus only.
+     Lightness ladder is widened so card/muted/secondary read as distinct purple layers. */
   --background: oklch(0.30 0.058 295);
   --foreground: oklch(0.98 0.005 295);
-  --card: oklch(0.355 0.06 295);
+  --card: oklch(0.37 0.06 295);
   --card-foreground: oklch(0.98 0.005 295);
-  --popover: oklch(0.355 0.06 295);
+  --popover: oklch(0.37 0.06 295);
   --popover-foreground: oklch(0.98 0.005 295);
   --primary: oklch(0.98 0.005 295);
   --primary-foreground: oklch(0.30 0.058 295);
-  --secondary: oklch(0.40 0.07 295);
+  --secondary: oklch(0.45 0.07 295);
   --secondary-foreground: oklch(0.98 0.005 295);
-  --muted: oklch(0.38 0.055 295);
-  --muted-foreground: oklch(0.78 0.035 295);
+  --muted: oklch(0.41 0.055 295);
+  --muted-foreground: oklch(0.80 0.035 295);
   --accent: oklch(1 0 0 / 10%);
   --accent-foreground: oklch(0.98 0.005 295);
   --destructive: oklch(0.704 0.191 22.216);
   --live: oklch(0.78 0.16 161);
-  --border: oklch(1 0 0 / 14%);
-  --input: oklch(1 0 0 / 18%);
+  /* In dark mode the tag sits on the card surface and leans on foreground colour for meaning. */
+  --status-live-bg: var(--card);
+  --status-live-fg: #9ce0c0;
+  --status-neutral-bg: var(--card);
+  --status-neutral-fg: oklch(0.98 0.005 295 / 0.85);
+  --border: oklch(1 0 0 / 16%);
+  --input: oklch(1 0 0 / 20%);
   --ring: oklch(0.853 0.084 170);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.355 0.06 295);
+  --sidebar: oklch(0.37 0.06 295);
   --sidebar-foreground: oklch(0.98 0.005 295);
   --sidebar-primary: oklch(0.98 0.005 295);
   --sidebar-primary-foreground: oklch(0.30 0.058 295);
   --sidebar-accent: oklch(1 0 0 / 10%);
   --sidebar-accent-foreground: oklch(0.98 0.005 295);
-  --sidebar-border: oklch(1 0 0 / 14%);
+  --sidebar-border: oklch(1 0 0 / 16%);
   --sidebar-ring: oklch(0.853 0.084 170);
 }
 

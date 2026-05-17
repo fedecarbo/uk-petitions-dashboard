@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import type { PetitionAttributes } from "@/lib/petitions-api";
+import { formatDateLong } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 
 interface PetitionProgressProps {
@@ -9,20 +10,7 @@ interface PetitionProgressProps {
   onInteract?: () => void;
 }
 
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
-
 const SUMMARY_MAX_CHARS = 240;
-
-function formatDate(iso: string | null | undefined): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  return dateFormatter.format(d);
-}
 
 function truncate(text: string, max: number): string {
   const trimmed = text.trim();
@@ -110,7 +98,7 @@ function buildTimeline(
   if (attrs.opened_at) {
     entries.push({
       iso: attrs.opened_at,
-      date: formatDate(attrs.opened_at)!,
+      date: formatDateLong(attrs.opened_at)!,
       title: "Petition published",
       body: (
         <>
@@ -135,7 +123,7 @@ function buildTimeline(
   if (attrs.response_threshold_reached_at) {
     entries.push({
       iso: attrs.response_threshold_reached_at,
-      date: formatDate(attrs.response_threshold_reached_at)!,
+      date: formatDateLong(attrs.response_threshold_reached_at)!,
       title: "Government will respond to this petition",
       body: (
         <p>
@@ -151,7 +139,7 @@ function buildTimeline(
     const details = attrs.government_response?.details?.trim() ?? null;
     entries.push({
       iso: attrs.government_response_at,
-      date: formatDate(attrs.government_response_at)!,
+      date: formatDateLong(attrs.government_response_at)!,
       title: "Government responded to this petition",
       body: summary ? (
         <ResponseBody
@@ -168,7 +156,7 @@ function buildTimeline(
   if (attrs.debate_threshold_reached_at) {
     entries.push({
       iso: attrs.debate_threshold_reached_at,
-      date: formatDate(attrs.debate_threshold_reached_at)!,
+      date: formatDateLong(attrs.debate_threshold_reached_at)!,
       title: "Petition will be considered for debate",
       body: (
         <p>
@@ -180,7 +168,7 @@ function buildTimeline(
   }
 
   if (attrs.scheduled_debate_date) {
-    const date = formatDate(attrs.scheduled_debate_date)!;
+    const date = formatDateLong(attrs.scheduled_debate_date)!;
     entries.push({
       iso: attrs.scheduled_debate_date,
       date,
@@ -201,7 +189,7 @@ function buildTimeline(
     const hasLinks = Boolean(videoUrl || transcriptUrl || packUrl);
     entries.push({
       iso: attrs.debate_outcome.debated_on,
-      date: formatDate(attrs.debate_outcome.debated_on)!,
+      date: formatDateLong(attrs.debate_outcome.debated_on)!,
       title: "Debated in Parliament",
       body: (
         <>
@@ -231,7 +219,7 @@ function buildTimeline(
   if (attrs.rejected_at) {
     entries.push({
       iso: attrs.rejected_at,
-      date: formatDate(attrs.rejected_at)!,
+      date: formatDateLong(attrs.rejected_at)!,
       title: "Petition rejected",
       body: <p>This petition was rejected and is not open for signatures.</p>,
     });
@@ -242,7 +230,7 @@ function buildTimeline(
     if (!Number.isNaN(closedAt.getTime()) && closedAt.getTime() <= Date.now()) {
       entries.push({
         iso: attrs.closed_at,
-        date: formatDate(attrs.closed_at)!,
+        date: formatDateLong(attrs.closed_at)!,
         title: "Petition closed",
         body: (
           <p>
