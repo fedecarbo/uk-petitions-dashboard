@@ -1,3 +1,6 @@
+"use client";
+
+import type { KeyboardEvent } from "react";
 import { signatureFormatter } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +14,7 @@ interface ConstituencyBarProps {
   onMouseLeave?: () => void;
   onFocus?: () => void;
   onBlur?: () => void;
+  onClick?: () => void;
 }
 
 export function ConstituencyBar({
@@ -23,17 +27,34 @@ export function ConstituencyBar({
   onMouseLeave,
   onFocus,
   onBlur,
+  onClick,
 }: ConstituencyBarProps) {
+  const interactive = Boolean(onClick || onMouseEnter);
+
+  function handleKeyDown(event: KeyboardEvent<HTMLLIElement>) {
+    if (!onClick) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onClick();
+    }
+  }
+
   return (
     <li
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onFocus={onFocus}
       onBlur={onBlur}
-      tabIndex={onMouseEnter ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      role={onClick ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
       className={cn(
         "relative overflow-hidden rounded-md border border-border/40 transition-colors",
-        onMouseEnter && "cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        interactive &&
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        onClick && "cursor-pointer hover:border-border",
+        !onClick && interactive && "cursor-default",
         isActive && "border-foreground/40 bg-foreground/[0.04]",
       )}
     >

@@ -3,11 +3,13 @@
 import {
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
   type Dispatch,
   type KeyboardEvent,
+  type Ref,
   type SetStateAction,
 } from "react";
 import { geoMercator, geoPath } from "d3-geo";
@@ -33,6 +35,10 @@ import {
 import { signatureFormatter } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
+export interface UKConstituencyMapHandle {
+  focusConstituency: (code: string) => void;
+}
+
 interface UKConstituencyMapProps {
   signaturesByConstituency: Array<{
     ons_code: string;
@@ -41,6 +47,8 @@ interface UKConstituencyMapProps {
   }>;
   activeCode: string | null;
   onActiveChange: Dispatch<SetStateAction<string | null>>;
+  onSelect?: (code: string) => void;
+  ref?: Ref<UKConstituencyMapHandle>;
 }
 
 const VIEWBOX_WIDTH = 600;
@@ -59,6 +67,9 @@ interface PreparedPath {
   code: string;
   name: string;
   d: string;
+  // Projected bounding box [x0, y0, x1, y1] in viewBox coords, used by
+  // focusConstituency() to compute the pan/zoom transform.
+  bbox: [number, number, number, number];
 }
 
 function prepareFeatures(collection: ConstituencyCollection): PreparedPath[] {
@@ -68,18 +79,26 @@ function prepareFeatures(collection: ConstituencyCollection): PreparedPath[] {
   );
   const path = geoPath(projection);
   return collection.features
-    .map((f: ConstituencyFeature) => ({
-      code: f.properties.PCON24CD,
-      name: f.properties.PCON24NM,
-      d: path(f) ?? "",
-    }))
-    .filter((p) => p.d.length > 0);
+    .map((f: ConstituencyFeature) => {
+      const d = path(f) ?? "";
+      if (!d) return null;
+      const [[x0, y0], [x1, y1]] = path.bounds(f);
+      return {
+        code: f.properties.PCON24CD,
+        name: f.properties.PCON24NM,
+        d,
+        bbox: [x0, y0, x1, y1] as [number, number, number, number],
+      };
+    })
+    .filter((p): p is PreparedPath => p !== null);
 }
 
 export function UKConstituencyMap({
   signaturesByConstituency,
   activeCode,
   onActiveChange,
+  onSelect,
+  ref,
 }: UKConstituencyMapProps) {
   const [paths, setPaths] = useState<PreparedPath[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -203,6 +222,36 @@ export function UKConstituencyMap({
       .call(zoomRef.current.transform, zoomIdentity);
   }, []);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      focusConstituency: (code: string) => {
+        if (!svgRef.current || !zoomRef.current || !paths) return;
+        const target = paths.find((p) => p.code === code);
+        if (!target) return;
+        const [x0, y0, x1, y1] = target.bbox;
+        const w = Math.max(1, x1 - x0);
+        const h = Math.max(1, y1 - y0);
+        // Aim to fill ~half the viewport so there's surrounding context.
+        // Clamp to ZOOM_MAX so tiny constituencies still center cleanly
+        // without exceeding the d3-zoom scaleExtent (the call would no-op).
+        const fitScale = 0.5 * Math.min(VIEWBOX_WIDTH / w, VIEWBOX_HEIGHT / h);
+        const scale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, fitScale));
+        const cx = (x0 + x1) / 2;
+        const cy = (y0 + y1) / 2;
+        const transform = zoomIdentity
+          .translate(VIEWBOX_WIDTH / 2 - scale * cx, VIEWBOX_HEIGHT / 2 - scale * cy)
+          .scale(scale);
+        select(svgRef.current)
+          .transition()
+          .duration(600)
+          .call(zoomRef.current.transform, transform);
+        onActiveChange(code);
+      },
+    }),
+    [paths, onActiveChange],
+  );
+
   const lookup = useMemo(() => {
     const m = new Map<string, { count: number; name: string }>();
     for (const c of signaturesByConstituency) {
@@ -305,6 +354,7 @@ export function UKConstituencyMap({
               binScale={binScale}
               activeCode={activeCode}
               setActiveCode={onActiveChange}
+              onSelect={onSelect}
             />
           ))}
         </g>
@@ -344,6 +394,7 @@ interface ChoroplethPathProps {
   binScale: BinScale;
   activeCode: string | null;
   setActiveCode: Dispatch<SetStateAction<string | null>>;
+  onSelect?: (code: string) => void;
 }
 
 function ChoroplethPath({
@@ -352,6 +403,7 @@ function ChoroplethPath({
   binScale,
   activeCode,
   setActiveCode,
+  onSelect,
 }: ChoroplethPathProps) {
   const data = lookup.get(path.code);
   const count = data?.count ?? 0;
@@ -364,6 +416,7 @@ function ChoroplethPath({
         BIN_FILL_CLASS[bin],
         "transition-[stroke-width] duration-100",
         isActive && "stroke-foreground",
+        onSelect && "cursor-pointer",
       )}
       strokeWidth={isActive ? 1.2 : 0.4}
       vectorEffect="non-scaling-stroke"
@@ -373,6 +426,7 @@ function ChoroplethPath({
       }
       onFocus={() => setActiveCode(path.code)}
       onBlur={() => setActiveCode((c) => (c === path.code ? null : c))}
+      onClick={onSelect ? () => onSelect(path.code) : undefined}
     >
       <title>{`${path.name}: ${signatureFormatter.format(count)} signatures`}</title>
     </path>
