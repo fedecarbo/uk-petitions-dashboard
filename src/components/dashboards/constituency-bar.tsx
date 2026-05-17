@@ -1,10 +1,16 @@
 import { signatureFormatter } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 interface ConstituencyBarProps {
   name: string;
   mp: string | null;
   signatureCount: number;
   widthPct: number;
+  isActive?: boolean;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 export function ConstituencyBar({
@@ -12,9 +18,25 @@ export function ConstituencyBar({
   mp,
   signatureCount,
   widthPct,
+  isActive = false,
+  onMouseEnter,
+  onMouseLeave,
+  onFocus,
+  onBlur,
 }: ConstituencyBarProps) {
   return (
-    <li className="relative overflow-hidden rounded-md border border-border/40">
+    <li
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      tabIndex={onMouseEnter ? 0 : undefined}
+      className={cn(
+        "relative overflow-hidden rounded-md border border-border/40 transition-colors",
+        onMouseEnter && "cursor-default focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        isActive && "border-foreground/40 bg-foreground/[0.04]",
+      )}
+    >
       <span
         aria-hidden
         className="absolute inset-y-0 left-0 bg-foreground/[0.06]"

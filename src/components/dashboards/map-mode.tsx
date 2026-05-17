@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { PetitionStatus } from "@/components/petition-status";
 import { ConstituencyBar } from "@/components/dashboards/constituency-bar";
 import { UKConstituencyMap } from "@/components/dashboards/uk-constituency-map";
@@ -29,13 +30,19 @@ export function MapMode({ attrs }: MapModeProps) {
       ?.signature_count ?? 0;
   const internationalCount = Math.max(0, countriesTotal - ukCount);
 
+  const [activeCode, setActiveCode] = useState<string | null>(null);
+
   return (
     <div className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
       <section
         aria-label="Constituency map"
         className="relative min-h-[360px] min-w-0 border-b border-border lg:min-h-0 lg:border-b-0 lg:border-r"
       >
-        <UKConstituencyMap signaturesByConstituency={constituencies} />
+        <UKConstituencyMap
+          signaturesByConstituency={constituencies}
+          activeCode={activeCode}
+          onActiveChange={setActiveCode}
+        />
       </section>
 
       <aside
@@ -76,13 +83,23 @@ export function MapMode({ attrs }: MapModeProps) {
                   4,
                   (item.signature_count / topCount) * 100,
                 );
+                const code = item.ons_code;
                 return (
                   <ConstituencyBar
-                    key={item.ons_code}
+                    key={code}
                     name={item.name}
                     mp={item.mp}
                     signatureCount={item.signature_count}
                     widthPct={widthPct}
+                    isActive={code === activeCode}
+                    onMouseEnter={() => setActiveCode(code)}
+                    onMouseLeave={() =>
+                      setActiveCode((c) => (c === code ? null : c))
+                    }
+                    onFocus={() => setActiveCode(code)}
+                    onBlur={() =>
+                      setActiveCode((c) => (c === code ? null : c))
+                    }
                   />
                 );
               })}

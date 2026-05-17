@@ -1,9 +1,11 @@
+import { scaleQuantile } from "d3-scale";
 import { feature } from "topojson-client";
 import type { Feature, FeatureCollection, Geometry } from "geojson";
 import type {
   GeometryCollection as TopoGeometryCollection,
   Topology,
 } from "topojson-specification";
+import { signatureFormatter } from "@/lib/format";
 
 export interface ConstituencyProps {
   PCON24CD: string;
@@ -13,31 +15,34 @@ export interface ConstituencyProps {
 export type ConstituencyFeature = Feature<Geometry, ConstituencyProps>;
 export type ConstituencyCollection = FeatureCollection<Geometry, ConstituencyProps>;
 
-let cache: Promise<ConstituencyCollection> | null = null;
-
-export function loadConstituencies(): Promise<ConstituencyCollection> {
-  if (!cache) {
-    cache = fetch("/uk-constituencies.topo.json")
-      .then((r) => {
-        if (!r.ok) throw new Error(`Failed to load constituency boundaries (${r.status})`);
-        return r.json() as Promise<Topology>;
-      })
-      .then((topo) => {
-        const obj = topo.objects.constituencies as TopoGeometryCollection<ConstituencyProps>;
-        return feature(topo, obj) as ConstituencyCollection;
-      });
-  }
-  return cache;
+function loadTopo(url: string): Promise<ConstituencyCollection> {
+  return fetch(url)
+    .then((r) => {
+      if (!r.ok) throw new Error(`Failed to load constituency boundaries (${r.status})`);
+      return r.json() as Promise<Topology>;
+    })
+    .then((topo) => {
+      const obj = topo.objects.constituencies as TopoGeometryCollection<ConstituencyProps>;
+      return feature(topo, obj) as ConstituencyCollection;
+    });
 }
 
-const BIN_THRESHOLDS = [1, 50, 250, 1000, 5000] as const;
+let baseCache: Promise<ConstituencyCollection> | null = null;
+let detailedCache: Promise<ConstituencyCollection> | null = null;
 
-export function binFor(count: number): number {
-  if (count <= 0) return 0;
-  for (let i = 0; i < BIN_THRESHOLDS.length; i++) {
-    if (count < BIN_THRESHOLDS[i]) return i + 1;
+export function loadConstituencies(): Promise<ConstituencyCollection> {
+  if (!baseCache) baseCache = loadTopo("/uk-constituencies.topo.json");
+  return baseCache;
+}
+
+// Higher-resolution boundaries (BGC, 20m simplification). Lazy-loaded on
+// first zoom-in past the detail threshold so the initial map paint stays
+// cheap. ~895 KB on the wire.
+export function loadDetailedConstituencies(): Promise<ConstituencyCollection> {
+  if (!detailedCache) {
+    detailedCache = loadTopo("/uk-constituencies-detailed.topo.json");
   }
-  return BIN_THRESHOLDS.length;
+  return detailedCache;
 }
 
 export const BIN_FILL_CLASS: Record<number, string> = {
@@ -49,11 +54,55 @@ export const BIN_FILL_CLASS: Record<number, string> = {
   5: "fill-primary",
 };
 
-export const BIN_LABELS: Array<{ label: string; bin: number }> = [
-  { label: "0", bin: 0 },
-  { label: "1–49", bin: 1 },
-  { label: "50–249", bin: 2 },
-  { label: "250–999", bin: 3 },
-  { label: "1k–4.9k", bin: 4 },
-  { label: "5k+", bin: 5 },
-];
+export interface BinLabel {
+  label: string;
+  bin: number;
+}
+
+export interface BinScale {
+  binFor: (count: number) => number;
+  labels: BinLabel[];
+}
+
+// Adaptive (quantile) bins. With fixed thresholds the choropleth washes out
+// for small petitions and saturates for viral ones; quantile bins partition
+// the actual distribution into 5 equal-size groups so the map always shows
+// meaningful variation. Bin 0 is reserved for unsigned constituencies.
+export function buildBinScale(
+  signatures: Array<{ signature_count: number }>,
+): BinScale {
+  const signed = signatures
+    .map((s) => s.signature_count)
+    .filter((n) => n > 0);
+
+  if (signed.length === 0) {
+    return {
+      binFor: () => 0,
+      labels: [{ label: "0", bin: 0 }],
+    };
+  }
+
+  const scale = scaleQuantile<number>().domain(signed).range([1, 2, 3, 4, 5]);
+
+  const sorted = [...signed].sort((a, b) => a - b);
+  const min = sorted[0];
+  const max = sorted[sorted.length - 1];
+  const quantiles = scale.quantiles();
+
+  const labels: BinLabel[] = [{ label: "0", bin: 0 }];
+  const boundaries = [min, ...quantiles, max + 1];
+  for (let i = 0; i < 5; i++) {
+    const lo = Math.ceil(boundaries[i]);
+    const hi = i === 4 ? max : Math.floor(boundaries[i + 1]) - 1;
+    const label =
+      lo >= hi
+        ? signatureFormatter.format(lo)
+        : `${signatureFormatter.format(lo)}–${signatureFormatter.format(hi)}`;
+    labels.push({ label, bin: i + 1 });
+  }
+
+  return {
+    binFor: (count) => (count <= 0 ? 0 : scale(count)),
+    labels,
+  };
+}
