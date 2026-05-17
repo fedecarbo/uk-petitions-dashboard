@@ -74,7 +74,7 @@ export function TopConstituencies({ items }: TopConstituenciesProps) {
 
 function Heading() {
   return (
-    <h2 className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground md:text-sm lg:text-base xl:text-lg">
+    <h2 className="text-lg font-semibold md:text-xl lg:text-2xl xl:text-3xl">
       Top constituencies
     </h2>
   );

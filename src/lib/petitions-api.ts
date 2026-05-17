@@ -18,6 +18,8 @@ export interface PetitionAttributes {
   updated_at: string;
   opened_at: string | null;
   closed_at: string | null;
+  closing_date: string | null;
+  creator_name: string | null;
   rejected_at: string | null;
   government_response_at: string | null;
   scheduled_debate_date: string | null;

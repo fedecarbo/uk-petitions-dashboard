@@ -34,15 +34,15 @@ export function LiveIndicator({
       : "Loading…";
 
   return (
-    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground md:text-sm lg:gap-3 lg:text-base xl:text-lg">
-      <span className="relative flex h-2.5 w-2.5 xl:h-3 xl:w-3">
+    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground md:text-sm">
+      <span className="relative flex h-2 w-2 md:h-2.5 md:w-2.5">
         <span
           className={cn(
             "absolute inline-flex h-full w-full rounded-full bg-live opacity-75",
             isRefreshing && "animate-ping",
           )}
         />
-        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-live xl:h-3 xl:w-3" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-live md:h-2.5 md:w-2.5" />
       </span>
       {label}
     </div>

@@ -111,7 +111,7 @@ export function StatCarousel({ attrs, history, className }: StatCarouselProps) {
         onMouseLeave={() => setHovering(false)}
         onFocus={() => setHovering(true)}
         onBlur={() => setHovering(false)}
-        className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-6"
+        className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-8"
       >
         {activeCard.render()}
       </div>

@@ -72,7 +72,7 @@ export function SigningVelocity({ history }: SigningVelocityProps) {
 
   return (
     <div className="flex h-full flex-col gap-4 lg:gap-5">
-      <h2 className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground md:text-sm lg:text-base xl:text-lg">
+      <h2 className="text-lg font-semibold md:text-xl lg:text-2xl xl:text-3xl">
         Signing velocity
       </h2>
 
@@ -93,7 +93,7 @@ export function SigningVelocity({ history }: SigningVelocityProps) {
               <span className="font-mono text-4xl font-bold leading-none tabular-nums md:text-5xl lg:text-6xl xl:text-7xl">
                 {rateFormatter.format(Math.max(0, rate))}
               </span>
-              <span className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground md:text-sm lg:text-base xl:text-lg">
+              <span className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base xl:text-lg">
                 / hour
               </span>
             </div>
@@ -108,7 +108,7 @@ export function SigningVelocity({ history }: SigningVelocityProps) {
 
           <dl className="grid grid-cols-2 gap-3 border-t border-border/50 pt-3 lg:gap-4 lg:pt-4">
             <div className="flex flex-col">
-              <dt className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground md:text-sm lg:text-base">
+              <dt className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base">
                 Today
               </dt>
               <dd className="font-mono text-xl font-semibold tabular-nums md:text-2xl lg:text-3xl">
@@ -116,7 +116,7 @@ export function SigningVelocity({ history }: SigningVelocityProps) {
               </dd>
             </div>
             <div className="flex flex-col">
-              <dt className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground md:text-sm lg:text-base">
+              <dt className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base">
                 Window
               </dt>
               <dd className="font-mono text-xl font-semibold tabular-nums md:text-2xl lg:text-3xl">

@@ -9,15 +9,12 @@ interface PetitionProgressProps {
   onInteract?: () => void;
 }
 
-const numberFormatter = new Intl.NumberFormat("en-GB");
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "long",
   year: "numeric",
 });
 
-const RESPONSE_THRESHOLD = 10_000;
-const DEBATE_THRESHOLD = 100_000;
 const SUMMARY_MAX_CHARS = 240;
 
 function formatDate(iso: string | null | undefined): string | null {
@@ -260,77 +257,19 @@ function buildTimeline(
   return entries;
 }
 
-interface NextTarget {
-  count: number;
-  caption: string;
-}
-
-function nextTarget(attrs: PetitionAttributes): NextTarget | null {
-  const isClosed =
-    attrs.state === "closed" ||
-    attrs.state === "rejected" ||
-    (attrs.closed_at !== null &&
-      new Date(attrs.closed_at).getTime() <= Date.now());
-  if (isClosed) return null;
-  if (!attrs.response_threshold_reached_at) {
-    return {
-      count: RESPONSE_THRESHOLD,
-      caption: "for a government response",
-    };
-  }
-  if (!attrs.debate_threshold_reached_at) {
-    return {
-      count: DEBATE_THRESHOLD,
-      caption: "to be considered for debate",
-    };
-  }
-  return null;
-}
-
 export function PetitionProgress({ attrs, onInteract }: PetitionProgressProps) {
-  const target = nextTarget(attrs);
   const entries = buildTimeline(attrs, onInteract);
-  const progressPct = target
-    ? Math.min(100, (attrs.signature_count / target.count) * 100)
-    : null;
 
   return (
     <div className="flex h-full flex-col gap-5 lg:gap-6">
       <div className="flex flex-col gap-1.5">
-        <h2 className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground md:text-sm lg:text-base xl:text-lg">
+        <h2 className="text-lg font-semibold md:text-xl lg:text-2xl xl:text-3xl">
           Petition progress
         </h2>
         <p className="text-xs leading-snug text-muted-foreground/80 md:text-sm lg:text-base xl:text-lg">
           View all updates for this petition, with the most recent first.
         </p>
       </div>
-
-      {target && progressPct !== null && (
-        <div className="flex flex-col gap-2">
-          <p className="font-sans text-sm leading-snug text-foreground md:text-base lg:text-lg xl:text-xl">
-            <span className="font-mono font-semibold tabular-nums">
-              {numberFormatter.format(attrs.signature_count)}
-            </span>{" "}
-            of{" "}
-            <span className="font-mono font-semibold tabular-nums">
-              {numberFormatter.format(target.count)}
-            </span>{" "}
-            signatures required {target.caption}
-          </p>
-          <div
-            className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-border lg:h-2"
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={target.count}
-            aria-valuenow={attrs.signature_count}
-          >
-            <div
-              className="h-full bg-foreground transition-[width] duration-500"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-        </div>
-      )}
 
       {entries.length > 0 && (
         <ol className="flex flex-col">
@@ -358,7 +297,7 @@ export function PetitionProgress({ attrs, onInteract }: PetitionProgressProps) {
                   {!isLast && (
                     <span
                       aria-hidden
-                      className="pointer-events-none absolute left-1/2 top-4 bottom-0 w-px -translate-x-1/2 bg-border lg:top-5"
+                      className="pointer-events-none absolute left-1/2 top-4 -bottom-4 w-px -translate-x-1/2 bg-border lg:top-5 lg:-bottom-5"
                     />
                   )}
                 </div>
@@ -367,7 +306,7 @@ export function PetitionProgress({ attrs, onInteract }: PetitionProgressProps) {
                   <span className="text-sm font-semibold leading-tight md:text-base lg:text-lg xl:text-xl">
                     {entry.date}
                   </span>
-                  <div className="flex flex-col gap-2 rounded-md border border-border/60 bg-card p-3 lg:p-4">
+                  <div className="flex flex-col gap-2 rounded-md border border-border/60 bg-card p-4 lg:p-5">
                     <h3 className="text-sm font-semibold leading-snug md:text-base lg:text-lg">
                       {entry.title}
                     </h3>

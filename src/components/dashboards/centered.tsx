@@ -30,7 +30,7 @@ export function DashboardCentered({ id }: DashboardCenteredProps) {
         <div className="flex min-w-0 items-center gap-4">
           <Link
             href="/"
-            className="shrink-0 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground md:text-sm lg:text-base xl:text-lg"
+            className="shrink-0 text-xs font-medium text-muted-foreground hover:text-foreground md:text-sm"
           >
             ← New search
           </Link>
@@ -55,7 +55,7 @@ export function DashboardCentered({ id }: DashboardCenteredProps) {
           >
             {signatureFormatter.format(attrs.signature_count)}
           </span>
-          <span className="text-sm font-medium uppercase tracking-[0.25em] text-muted-foreground md:text-base lg:text-lg xl:text-xl 2xl:text-2xl">
+          <span className="text-sm font-medium text-muted-foreground md:text-base lg:text-lg xl:text-xl 2xl:text-2xl">
             Signatures
           </span>
         </div>
