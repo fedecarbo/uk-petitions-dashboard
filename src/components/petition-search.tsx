@@ -54,7 +54,7 @@ export function PetitionSearch() {
                 setValue(EXAMPLE_ID);
                 submit(EXAMPLE_ID);
               }}
-              className="font-medium text-foreground underline-offset-4 hover:underline"
+              className="font-medium text-primary underline-offset-4 hover:underline"
             >
               petition #{EXAMPLE_ID}
             </button>

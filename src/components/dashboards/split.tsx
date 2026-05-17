@@ -90,7 +90,7 @@ function JourneyBar({ attrs }: { attrs: PetitionAttributes }) {
       )}
       <div className="relative py-1.5">
         <div
-          className="h-2 w-full overflow-hidden bg-foreground/10 md:h-2.5 lg:h-3 2xl:h-4"
+          className="h-2 w-full overflow-hidden bg-primary/10 md:h-2.5 lg:h-3 2xl:h-4"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
@@ -100,7 +100,7 @@ function JourneyBar({ attrs }: { attrs: PetitionAttributes }) {
           <div
             className={cn(
               "h-full transition-[width] duration-500",
-              isClosed ? "bg-muted-foreground/50" : "bg-foreground",
+              isClosed ? "bg-muted-foreground/50" : "bg-primary",
             )}
             style={{ width: `${progress * 100}%` }}
           />
@@ -138,7 +138,7 @@ function JourneyTick({
       style={{ left: `${position * 100}%` }}
       className={cn(
         "pointer-events-none absolute inset-y-0 w-px -translate-x-1/2",
-        reached ? "bg-foreground" : "bg-muted-foreground/70",
+        reached ? "bg-primary" : "bg-muted-foreground/70",
       )}
     />
   );
@@ -184,7 +184,7 @@ function AdditionalDetails({ text }: { text: string }) {
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="self-start text-xs font-medium text-foreground underline underline-offset-4 hover:no-underline md:text-sm lg:text-base"
+        className="self-start text-xs font-medium text-primary underline underline-offset-4 hover:no-underline md:text-sm lg:text-base"
         aria-expanded={expanded}
       >
         {expanded ? "Show less" : "Show more"}
@@ -231,7 +231,7 @@ export function DashboardSplit({ id }: DashboardSplitProps) {
               <PetitionByline attrs={attrs} />
 
               {attrs.background && (
-                <p className="max-w-3xl whitespace-pre-line text-base leading-snug text-foreground/85 md:text-lg lg:text-lg xl:text-xl 2xl:text-2xl">
+                <p className="max-w-3xl whitespace-pre-line text-base leading-snug text-muted-foreground md:text-lg lg:text-lg xl:text-xl 2xl:text-2xl">
                   {attrs.background}
                 </p>
               )}

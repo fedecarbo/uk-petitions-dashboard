@@ -29,7 +29,7 @@ export function DashboardError({ id, message }: DashboardErrorProps) {
         <p className="text-base">{message}</p>
         <Link
           href="/"
-          className="text-sm font-medium underline underline-offset-4"
+          className="text-sm font-medium text-primary underline underline-offset-4"
         >
           ← Back to search
         </Link>

@@ -57,9 +57,9 @@ function ResponseBody({ summary, details, onInteract }: ResponseBodyProps) {
 
   return (
     <>
-      <p className="italic text-foreground/85">&ldquo;{summary}&rdquo;</p>
+      <p className="italic text-muted-foreground">&ldquo;{summary}&rdquo;</p>
       {expanded && paragraphs.length > 0 && (
-        <div className="flex flex-col gap-2 text-foreground/85">
+        <div className="flex flex-col gap-2 text-muted-foreground">
           {paragraphs.map((p, i) => (
             <p key={i}>{p}</p>
           ))}
@@ -72,7 +72,7 @@ function ResponseBody({ summary, details, onInteract }: ResponseBodyProps) {
             setExpanded((v) => !v);
             onInteract?.();
           }}
-          className="self-start text-xs font-medium text-foreground underline underline-offset-4 hover:no-underline md:text-sm lg:text-base"
+          className="self-start text-xs font-medium text-primary underline underline-offset-4 hover:no-underline md:text-sm lg:text-base"
         >
           {expanded ? "Show less" : "Read full response"}
         </button>
@@ -93,7 +93,7 @@ function DebateLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-baseline gap-1 text-xs font-medium text-foreground underline underline-offset-4 hover:no-underline md:text-sm lg:text-base"
+      className="inline-flex items-baseline gap-1 text-xs font-medium text-primary underline underline-offset-4 hover:no-underline md:text-sm lg:text-base"
     >
       {children}
       <span aria-hidden>↗</span>
