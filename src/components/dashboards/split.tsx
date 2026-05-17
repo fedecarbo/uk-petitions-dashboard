@@ -220,7 +220,7 @@ export function DashboardSplit({ id }: DashboardSplitProps) {
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col border border-border lg:min-h-0 lg:overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-border lg:min-h-0">
         <div className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
           <section className="flex min-w-0 flex-col border-b border-border lg:grid lg:grid-rows-[2fr_1fr] lg:border-b-0 lg:border-r lg:min-h-0 lg:overflow-hidden">
             <div className="no-scrollbar flex flex-col gap-3 border-b border-border p-6 md:gap-4 md:p-8 lg:min-h-0 lg:overflow-y-auto lg:p-8">
