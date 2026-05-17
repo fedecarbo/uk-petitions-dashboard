@@ -8,12 +8,11 @@ import {
   DashboardLoading,
 } from "@/components/dashboards/states";
 import { usePetition } from "@/hooks/use-petition";
+import { signatureFormatter } from "@/lib/format";
 
 interface DashboardCenteredProps {
   id: string;
 }
-
-const signatureFormatter = new Intl.NumberFormat("en-GB");
 
 export function DashboardCentered({ id }: DashboardCenteredProps) {
   const { state, lastUpdated, isRefreshing } = usePetition(id);

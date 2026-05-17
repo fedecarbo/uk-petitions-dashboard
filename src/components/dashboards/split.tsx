@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { LiveIndicator } from "@/components/live-indicator";
 import { PetitionStatus } from "@/components/petition-status";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -9,9 +10,16 @@ import {
   DashboardError,
   DashboardLoading,
 } from "@/components/dashboards/states";
+import { MapMode } from "@/components/dashboards/map-mode";
 import { StatCarousel } from "@/components/dashboards/stat-carousel";
+import {
+  ViewToggle,
+  type DashboardView,
+} from "@/components/dashboards/view-toggle";
 import { usePetition } from "@/hooks/use-petition";
+import { signatureFormatter } from "@/lib/format";
 import type { PetitionAttributes } from "@/lib/petitions-api";
+import type { PetitionHistorySample } from "@/hooks/use-petition";
 import {
   isPetitionClosed,
   journeyProgress,
@@ -21,9 +29,9 @@ import { cn } from "@/lib/utils";
 
 interface DashboardSplitProps {
   id: string;
+  view: DashboardView;
 }
 
-const signatureFormatter = new Intl.NumberFormat("en-GB");
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "short",
@@ -193,14 +201,82 @@ function AdditionalDetails({ text }: { text: string }) {
   );
 }
 
-export function DashboardSplit({ id }: DashboardSplitProps) {
+function StatsBody({
+  attrs,
+  history,
+}: {
+  attrs: PetitionAttributes;
+  history: PetitionHistorySample[];
+}) {
+  return (
+    <div className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
+      <section className="flex min-w-0 flex-col border-b border-border lg:grid lg:grid-rows-[2fr_1fr] lg:border-b-0 lg:border-r lg:min-h-0 lg:overflow-hidden">
+        <div className="no-scrollbar flex flex-col gap-3 border-b border-border p-6 md:gap-4 md:p-8 lg:min-h-0 lg:overflow-y-auto lg:p-8">
+          <PetitionStatus state={attrs.state} />
+          <h1 className="text-2xl font-semibold leading-[1.1] tracking-tight text-balance md:text-3xl lg:text-3xl xl:text-4xl 2xl:text-6xl">
+            {attrs.action}
+          </h1>
+          <PetitionByline attrs={attrs} />
+
+          {attrs.background && (
+            <p className="max-w-3xl whitespace-pre-line text-base leading-snug text-muted-foreground md:text-lg lg:text-lg xl:text-xl 2xl:text-2xl">
+              {attrs.background}
+            </p>
+          )}
+
+          {attrs.additional_details && (
+            <AdditionalDetails text={attrs.additional_details} />
+          )}
+        </div>
+
+        <div className="flex flex-col justify-center gap-2 p-6 md:gap-3 md:p-8 lg:min-h-0 lg:p-8">
+          <div className="flex items-baseline gap-3 md:gap-4 lg:gap-5 2xl:gap-6">
+            <span
+              aria-label={`${signatureFormatter.format(attrs.signature_count)} signatures`}
+              className="font-mono text-6xl font-bold leading-none tracking-tight tabular-nums sm:text-7xl lg:text-7xl xl:text-8xl 2xl:text-8xl"
+            >
+              {signatureFormatter.format(attrs.signature_count)}
+            </span>
+            <span className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base xl:text-lg 2xl:text-xl">
+              Signatures
+            </span>
+          </div>
+          <JourneyBar attrs={attrs} />
+        </div>
+      </section>
+
+      <aside
+        aria-label="Petition statistics"
+        className="min-h-[320px] lg:min-h-0 lg:overflow-hidden"
+      >
+        <StatCarousel attrs={attrs} history={history} className="h-full" />
+      </aside>
+    </div>
+  );
+}
+
+export function DashboardSplit({ id, view }: DashboardSplitProps) {
   const { state, lastUpdated, isRefreshing, history } = usePetition(id);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   if (state.status === "loading") return <DashboardLoading id={id} />;
   if (state.status === "error")
     return <DashboardError id={id} message={state.message} />;
 
   const attrs = state.data.data.attributes;
+
+  function handleViewChange(next: DashboardView) {
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    if (next === "stats") {
+      params.delete("view");
+    } else {
+      params.set("view", next);
+    }
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname);
+  }
 
   return (
     <main className="flex min-h-dvh flex-col gap-3 p-6 md:gap-4 md:p-8 lg:h-dvh lg:gap-4 lg:overflow-hidden lg:p-10 xl:p-12">
@@ -216,58 +292,17 @@ export function DashboardSplit({ id }: DashboardSplitProps) {
             lastUpdated={lastUpdated}
             isRefreshing={isRefreshing}
           />
+          <ViewToggle value={view} onChange={handleViewChange} />
           <ThemeToggle />
         </div>
       </header>
 
       <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-border lg:min-h-0">
-        <div className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
-          <section className="flex min-w-0 flex-col border-b border-border lg:grid lg:grid-rows-[2fr_1fr] lg:border-b-0 lg:border-r lg:min-h-0 lg:overflow-hidden">
-            <div className="no-scrollbar flex flex-col gap-3 border-b border-border p-6 md:gap-4 md:p-8 lg:min-h-0 lg:overflow-y-auto lg:p-8">
-              <PetitionStatus state={attrs.state} />
-              <h1 className="text-2xl font-semibold leading-[1.1] tracking-tight text-balance md:text-3xl lg:text-3xl xl:text-4xl 2xl:text-6xl">
-                {attrs.action}
-              </h1>
-              <PetitionByline attrs={attrs} />
-
-              {attrs.background && (
-                <p className="max-w-3xl whitespace-pre-line text-base leading-snug text-muted-foreground md:text-lg lg:text-lg xl:text-xl 2xl:text-2xl">
-                  {attrs.background}
-                </p>
-              )}
-
-              {attrs.additional_details && (
-                <AdditionalDetails text={attrs.additional_details} />
-              )}
-            </div>
-
-            <div className="flex flex-col justify-center gap-2 p-6 md:gap-3 md:p-8 lg:min-h-0 lg:p-8">
-              <div className="flex items-baseline gap-3 md:gap-4 lg:gap-5 2xl:gap-6">
-                <span
-                  aria-label={`${signatureFormatter.format(attrs.signature_count)} signatures`}
-                  className="font-mono text-6xl font-bold leading-none tracking-tight tabular-nums sm:text-7xl lg:text-7xl xl:text-8xl 2xl:text-8xl"
-                >
-                  {signatureFormatter.format(attrs.signature_count)}
-                </span>
-                <span className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base xl:text-lg 2xl:text-xl">
-                  Signatures
-                </span>
-              </div>
-              <JourneyBar attrs={attrs} />
-            </div>
-          </section>
-
-          <aside
-            aria-label="Petition statistics"
-            className="min-h-[320px] lg:min-h-0 lg:overflow-hidden"
-          >
-            <StatCarousel
-              attrs={attrs}
-              history={history}
-              className="h-full"
-            />
-          </aside>
-        </div>
+        {view === "map" ? (
+          <MapMode attrs={attrs} />
+        ) : (
+          <StatsBody attrs={attrs} history={history} />
+        )}
       </div>
     </main>
   );

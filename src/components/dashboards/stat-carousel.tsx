@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PetitionAttributes } from "@/lib/petitions-api";
 import type { PetitionHistorySample } from "@/hooks/use-petition";
 import { cn } from "@/lib/utils";
-import { Geography } from "@/components/dashboards/stats/geography";
 import { PetitionProgress } from "@/components/dashboards/stats/petition-progress";
 import { Activity } from "@/components/dashboards/stats/activity";
 
@@ -48,11 +47,6 @@ export function StatCarousel({ attrs, history, className }: StatCarouselProps) {
         id: "progress",
         label: "Progress",
         render: () => <PetitionProgress attrs={attrs} onInteract={pin} />,
-      },
-      {
-        id: "geography",
-        label: "Geography",
-        render: () => <Geography attrs={attrs} />,
       },
       {
         id: "activity",
