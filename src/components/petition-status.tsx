@@ -16,19 +16,21 @@ const STATE_LABEL: Record<PetitionState, string> = {
   not_debated: "Not debated",
 };
 
+const LIVE_STATES = new Set<PetitionState>(["open", "awaiting_response", "awaiting_debate"]);
+
 export function PetitionStatus({ state }: PetitionStatusProps) {
   const label = STATE_LABEL[state] ?? state;
-  const isLive = state === "open" || state === "awaiting_response" || state === "awaiting_debate";
+  const isLive = LIVE_STATES.has(state);
 
   return (
-    <span className="inline-flex items-center gap-1.5 self-start rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium lg:gap-2 lg:px-3 lg:py-1.5 lg:text-base xl:px-4 xl:py-2 xl:text-lg">
-      <span
-        className={cn(
-          "h-1.5 w-1.5 rounded-full lg:h-2 lg:w-2",
-          isLive ? "bg-live" : "bg-muted-foreground",
-        )}
-        aria-hidden
-      />
+    <span
+      className={cn(
+        "inline-flex items-center self-start rounded-sm px-2.5 py-1 text-xs font-medium lg:px-3 lg:py-1.5 lg:text-base xl:px-4 xl:py-2 xl:text-lg",
+        isLive
+          ? "bg-[#cce2d8] text-[#006548] dark:bg-card dark:text-[#9ce0c0]"
+          : "bg-[#eeefef] text-[#383f43] dark:bg-card dark:text-foreground/85",
+      )}
+    >
       {label}
     </span>
   );
