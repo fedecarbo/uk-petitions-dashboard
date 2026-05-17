@@ -1,9 +1,9 @@
 "use client";
 
 import type { PetitionHistorySample } from "@/hooks/use-petition";
-import { velocityPerHour, windowSpanMinutes } from "@/lib/velocity";
+import { velocityPerHour } from "@/lib/velocity";
 
-interface SigningVelocityProps {
+interface ActivityProps {
   history: PetitionHistorySample[];
 }
 
@@ -11,6 +11,14 @@ const numberFormatter = new Intl.NumberFormat("en-GB");
 const rateFormatter = new Intl.NumberFormat("en-GB", {
   maximumFractionDigits: 0,
 });
+
+type Trend = "accelerating" | "steady" | "slowing";
+
+const TREND_LABEL: Record<Trend, { glyph: string; word: string }> = {
+  accelerating: { glyph: "↑", word: "accelerating" },
+  steady: { glyph: "→", word: "steady" },
+  slowing: { glyph: "↓", word: "slowing" },
+};
 
 function computeTodayTotal(history: PetitionHistorySample[]): number {
   if (history.length < 2) return 0;
@@ -22,11 +30,31 @@ function computeTodayTotal(history: PetitionHistorySample[]): number {
   return Math.max(0, todays[todays.length - 1].count - todays[0].count);
 }
 
-interface SparklineProps {
-  history: PetitionHistorySample[];
+function ratePerMs(samples: PetitionHistorySample[]): number | null {
+  if (samples.length < 2) return null;
+  const span = samples[samples.length - 1].t - samples[0].t;
+  if (span <= 0) return null;
+  return (samples[samples.length - 1].count - samples[0].count) / span;
 }
 
-function Sparkline({ history }: SparklineProps) {
+function computeTrend(history: PetitionHistorySample[]): Trend | null {
+  if (history.length < 4) return null;
+  const first = history[0].t;
+  const last = history[history.length - 1].t;
+  const midT = first + (last - first) / 2;
+  const before = history.filter((s) => s.t <= midT);
+  const after = history.filter((s) => s.t >= midT);
+  const r1 = ratePerMs(before);
+  const r2 = ratePerMs(after);
+  if (r1 === null || r2 === null) return null;
+  if (r1 <= 0) return r2 > 0 ? "accelerating" : "steady";
+  const ratio = r2 / r1;
+  if (ratio >= 1.1) return "accelerating";
+  if (ratio <= 0.9) return "slowing";
+  return "steady";
+}
+
+function Sparkline({ history }: { history: PetitionHistorySample[] }) {
   if (history.length < 2) return null;
   const counts = history.map((s) => s.count);
   const min = Math.min(...counts);
@@ -64,16 +92,17 @@ function Sparkline({ history }: SparklineProps) {
   );
 }
 
-export function SigningVelocity({ history }: SigningVelocityProps) {
+export function Activity({ history }: ActivityProps) {
   const rate = velocityPerHour(history);
   const todayTotal = computeTodayTotal(history);
-  const sampleCount = history.length;
-  const windowMinutes = windowSpanMinutes(history);
+  const trend = computeTrend(history);
+  const cadenceSeconds =
+    rate !== null && rate > 0 ? Math.max(1, Math.round(3600 / rate)) : null;
 
   return (
     <div className="flex h-full flex-col gap-4 lg:gap-5">
       <h2 className="text-lg font-semibold md:text-xl lg:text-2xl xl:text-3xl">
-        Signing velocity
+        Activity
       </h2>
 
       {rate === null ? (
@@ -82,13 +111,13 @@ export function SigningVelocity({ history }: SigningVelocityProps) {
             Calculating…
           </p>
           <p className="max-w-sm text-sm leading-snug text-muted-foreground/80 md:text-base lg:text-lg">
-            Velocity becomes available once the dashboard has observed at least
+            Activity becomes available once the dashboard has observed at least
             two polling intervals (~1 minute).
           </p>
         </div>
       ) : (
         <div className="flex flex-1 flex-col gap-4 lg:gap-5">
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-1.5">
             <div className="flex items-baseline gap-2">
               <span className="font-mono text-4xl font-bold leading-none tabular-nums md:text-5xl lg:text-6xl xl:text-7xl">
                 {rateFormatter.format(Math.max(0, rate))}
@@ -97,33 +126,38 @@ export function SigningVelocity({ history }: SigningVelocityProps) {
                 / hour
               </span>
             </div>
-            <span className="mt-1.5 text-sm text-muted-foreground md:text-base lg:text-lg">
-              Based on the last {Math.max(1, windowMinutes)} min ({sampleCount} polls)
-            </span>
+            {cadenceSeconds !== null && (
+              <p className="text-sm text-muted-foreground md:text-base lg:text-lg">
+                {cadenceSeconds === 1
+                  ? "≈ one signature every second"
+                  : `≈ one signature every ${cadenceSeconds} seconds`}
+              </p>
+            )}
           </div>
 
           <div className="text-foreground/80">
             <Sparkline history={history} />
           </div>
 
-          <dl className="grid grid-cols-2 gap-3 border-t border-border/50 pt-3 lg:gap-4 lg:pt-4">
-            <div className="flex flex-col">
-              <dt className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base">
-                Today
-              </dt>
-              <dd className="font-mono text-xl font-semibold tabular-nums md:text-2xl lg:text-3xl">
-                {numberFormatter.format(todayTotal)}
-              </dd>
-            </div>
-            <div className="flex flex-col">
-              <dt className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base">
-                Window
-              </dt>
-              <dd className="font-mono text-xl font-semibold tabular-nums md:text-2xl lg:text-3xl">
-                {Math.max(1, windowMinutes)}m
-              </dd>
-            </div>
-          </dl>
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-border/50 pt-3 text-sm md:text-base lg:pt-4 lg:text-lg">
+            <span className="text-muted-foreground">Today</span>
+            <span className="font-mono font-semibold tabular-nums">
+              {numberFormatter.format(todayTotal)}
+            </span>
+            {trend && (
+              <>
+                <span aria-hidden className="text-muted-foreground/50">
+                  ·
+                </span>
+                <span className="text-muted-foreground">
+                  <span aria-hidden className="pr-1 font-mono">
+                    {TREND_LABEL[trend].glyph}
+                  </span>
+                  {TREND_LABEL[trend].word}
+                </span>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>

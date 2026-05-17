@@ -79,7 +79,6 @@ This is the present structure; it has changed several times and may change again
 
 ## What's deferred (do not build without asking)
 
-- **Country breakdown** — `signatures_by_country` is fetched but not yet shown; candidate for a future carousel card.
 - **Theme system** — dark/light toggle, custom colour tokens.
 - **Welcome-view trending petitions list** — kept off intentionally to preserve minimalism.
 - **Other**: authentication, persistence, sharing/social meta, count-up animation.

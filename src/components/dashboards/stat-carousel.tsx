@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PetitionAttributes } from "@/lib/petitions-api";
 import type { PetitionHistorySample } from "@/hooks/use-petition";
 import { cn } from "@/lib/utils";
-import { TopConstituencies } from "@/components/dashboards/stats/top-constituencies";
+import { Geography } from "@/components/dashboards/stats/geography";
 import { PetitionProgress } from "@/components/dashboards/stats/petition-progress";
-import { SigningVelocity } from "@/components/dashboards/stats/signing-velocity";
+import { Activity } from "@/components/dashboards/stats/activity";
 
 const ROTATION_MS = 8_000;
 const TICK_MS = 100;
@@ -50,16 +50,14 @@ export function StatCarousel({ attrs, history, className }: StatCarouselProps) {
         render: () => <PetitionProgress attrs={attrs} onInteract={pin} />,
       },
       {
-        id: "constituencies",
-        label: "Constituencies",
-        render: () => (
-          <TopConstituencies items={attrs.signatures_by_constituency} />
-        ),
+        id: "geography",
+        label: "Geography",
+        render: () => <Geography attrs={attrs} />,
       },
       {
-        id: "velocity",
-        label: "Velocity",
-        render: () => <SigningVelocity history={history} />,
+        id: "activity",
+        label: "Activity",
+        render: () => <Activity history={history} />,
       },
     ],
     [attrs, history, pin],
@@ -103,6 +101,45 @@ export function StatCarousel({ attrs, history, className }: StatCarouselProps) {
 
   return (
     <div className={cn("flex flex-col bg-card", className)}>
+      <div className="relative shrink-0 border-b border-border">
+        <div
+          role="tablist"
+          aria-label="Petition statistics"
+          className="flex"
+        >
+          {cards.map((card, idx) => {
+            const isActive = idx === activeIndex;
+            return (
+              <button
+                key={card.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                aria-controls={`stat-panel-${card.id}`}
+                id={`stat-tab-${card.id}`}
+                onClick={() => handleTabClick(idx)}
+                className={cn(
+                  "flex-1 px-3 py-3 text-xs font-medium transition-colors md:text-sm lg:py-4 lg:text-base",
+                  idx > 0 && "border-l border-border",
+                  isActive
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
+                )}
+              >
+                {card.label}
+              </button>
+            );
+          })}
+        </div>
+        {rotating && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute bottom-0 left-0 h-px bg-foreground/50 transition-[width] duration-100"
+            style={{ width: `${progressPct}%` }}
+          />
+        )}
+      </div>
+
       <div
         role="tabpanel"
         id={`stat-panel-${activeCard.id}`}
@@ -114,49 +151,6 @@ export function StatCarousel({ attrs, history, className }: StatCarouselProps) {
         className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-8"
       >
         {activeCard.render()}
-      </div>
-
-      <div className="relative shrink-0 border-t border-border">
-        {rotating && (
-          <span
-            aria-hidden
-            className="pointer-events-none absolute left-0 top-0 h-px bg-foreground/50 transition-[width] duration-100"
-            style={{ width: `${progressPct}%` }}
-          />
-        )}
-        <div
-          role="tablist"
-          aria-label="Petition statistics"
-          className="flex items-center justify-center gap-3 py-3 lg:gap-4 lg:py-4"
-        >
-          {cards.map((card, idx) => {
-            const isActive = idx === activeIndex;
-            return (
-              <button
-                key={card.id}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                aria-controls={`stat-panel-${card.id}`}
-                aria-label={card.label}
-                title={card.label}
-                id={`stat-tab-${card.id}`}
-                onClick={() => handleTabClick(idx)}
-                className="group flex h-6 w-6 items-center justify-center"
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    "block rounded-full transition-all",
-                    isActive
-                      ? "h-3 w-3 bg-foreground lg:h-3.5 lg:w-3.5"
-                      : "h-3 w-3 border-2 border-foreground/70 bg-transparent group-hover:bg-foreground/30 lg:h-3.5 lg:w-3.5",
-                  )}
-                />
-              </button>
-            );
-          })}
-        </div>
       </div>
     </div>
   );
