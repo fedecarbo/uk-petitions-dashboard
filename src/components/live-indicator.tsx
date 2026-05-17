@@ -1,0 +1,50 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+
+interface LiveIndicatorProps {
+  lastUpdated: number | null;
+  isRefreshing: boolean;
+}
+
+function formatAge(ms: number): string {
+  const seconds = Math.floor(ms / 1000);
+  if (seconds < 5) return "just now";
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes}m ago`;
+}
+
+export function LiveIndicator({
+  lastUpdated,
+  isRefreshing,
+}: LiveIndicatorProps) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const label = isRefreshing
+    ? "Updating…"
+    : lastUpdated
+      ? `Updated ${formatAge(now - lastUpdated)}`
+      : "Loading…";
+
+  return (
+    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground md:text-sm lg:gap-3 lg:text-base xl:text-lg">
+      <span className="relative flex h-2.5 w-2.5 xl:h-3 xl:w-3">
+        <span
+          className={cn(
+            "absolute inline-flex h-full w-full rounded-full bg-live opacity-75",
+            isRefreshing && "animate-ping",
+          )}
+        />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-live xl:h-3 xl:w-3" />
+      </span>
+      {label}
+    </div>
+  );
+}
