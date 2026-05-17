@@ -119,14 +119,20 @@ export function StatCarousel({ attrs, history, className }: StatCarouselProps) {
                 id={`stat-tab-${card.id}`}
                 onClick={() => handleTabClick(idx)}
                 className={cn(
-                  "flex-1 px-3 py-3 text-xs font-medium transition-colors md:text-sm lg:py-4 lg:text-base",
+                  "relative flex-1 px-3 py-3 text-xs font-medium transition-colors md:text-sm lg:py-4 lg:text-base",
                   idx > 0 && "border-l border-border",
                   isActive
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
+                    ? "bg-card text-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground",
                 )}
               >
                 {card.label}
+                {isActive && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-card"
+                  />
+                )}
               </button>
             );
           })}
