@@ -54,6 +54,17 @@ export const BIN_FILL_CLASS: Record<number, string> = {
   5: "fill-primary",
 };
 
+// HTML equivalent for swatches in the legend etc. — `fill-*` is an SVG-only
+// CSS property, so spans need `bg-*` to render the same colour.
+export const BIN_BG_CLASS: Record<number, string> = {
+  0: "bg-muted",
+  1: "bg-primary/15",
+  2: "bg-primary/30",
+  3: "bg-primary/50",
+  4: "bg-primary/75",
+  5: "bg-primary",
+};
+
 export interface BinLabel {
   label: string;
   bin: number;

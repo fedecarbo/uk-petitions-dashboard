@@ -23,6 +23,7 @@ import {
 } from "d3-zoom";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 import {
+  BIN_BG_CLASS,
   BIN_FILL_CLASS,
   buildBinScale,
   loadConstituencies,
@@ -516,27 +517,23 @@ function ZoomButton({
 }
 
 function Legend({ labels }: { labels: BinLabel[] }) {
-  const min = labels[0]?.label ?? "";
-  const max = labels[labels.length - 1]?.label ?? "";
   return (
-    <div className="pointer-events-none absolute bottom-3 left-3 flex flex-col gap-1 rounded-md border border-border bg-card/90 px-2 py-1.5 text-[10px] text-muted-foreground backdrop-blur lg:text-xs">
-      <div className="flex items-center gap-1">
+    <div className="pointer-events-none absolute bottom-3 left-3 flex flex-col gap-1.5 rounded-md border border-border bg-card/95 px-2.5 py-2 text-xs text-muted-foreground backdrop-blur lg:text-sm">
+      <p className="font-medium text-foreground">Signatures</p>
+      <ul className="flex flex-col gap-1">
         {labels.map((entry) => (
-          <span
-            key={entry.bin}
-            aria-hidden
-            title={entry.label}
-            className={cn(
-              "block h-3 w-4 border border-border/40 lg:h-3.5 lg:w-5",
-              BIN_FILL_CLASS[entry.bin],
-            )}
-          />
+          <li key={entry.bin} className="flex items-center gap-2">
+            <span
+              aria-hidden
+              className={cn(
+                "block h-3 w-4 shrink-0 rounded-sm border border-border/40 lg:h-3.5 lg:w-5",
+                BIN_BG_CLASS[entry.bin],
+              )}
+            />
+            <span className="font-mono tabular-nums">{entry.label}</span>
+          </li>
         ))}
-      </div>
-      <div className="flex items-center justify-between gap-2 font-mono tabular-nums">
-        <span>{min}</span>
-        <span>{max}</span>
-      </div>
+      </ul>
     </div>
   );
 }
