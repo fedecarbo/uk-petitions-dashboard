@@ -27,7 +27,6 @@ interface MapModeProps {
   attrs: PetitionAttributes;
 }
 
-const UK_COUNTRY_CODE = "GB";
 const TOP_N = 10;
 
 export function MapMode({ attrs }: MapModeProps) {
@@ -57,15 +56,6 @@ export function MapMode({ attrs }: MapModeProps) {
   );
 
   const binScale = useMemo(() => buildBinScale(constituencies), [constituencies]);
-
-  const countriesTotal = attrs.signatures_by_country.reduce(
-    (sum, c) => sum + c.signature_count,
-    0,
-  );
-  const ukCount =
-    attrs.signatures_by_country.find((c) => c.code === UK_COUNTRY_CODE)
-      ?.signature_count ?? 0;
-  const internationalCount = Math.max(0, countriesTotal - ukCount);
 
   const [hoverCode, setHoverCode] = useState<string | null>(null);
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
@@ -108,30 +98,33 @@ export function MapMode({ attrs }: MapModeProps) {
 
       <aside
         aria-label="Petition summary and top constituencies"
-        className="flex min-w-0 flex-col gap-4 p-6 md:gap-5 md:p-8 lg:min-h-0 lg:overflow-y-auto lg:gap-5 lg:p-8"
+        className="flex min-w-0 flex-col lg:min-h-0"
       >
-        {/* Static identity — petition status, title, hero count */}
-        <div className="flex flex-col gap-2 lg:gap-3">
+        <section
+          aria-label="Petition identity"
+          className="flex flex-col gap-3 border-b border-border p-6 md:gap-4 md:p-8 lg:shrink-0 lg:gap-4 lg:p-8"
+        >
           <PetitionStatus state={attrs.state} />
           <h1 className="text-lg leading-tight font-semibold tracking-tight text-balance md:text-xl lg:text-xl xl:text-2xl 2xl:text-3xl">
             {attrs.action}
           </h1>
-        </div>
+          <div className="flex items-baseline gap-2 lg:gap-3">
+            <span
+              aria-label={`${signatureFormatter.format(attrs.signature_count)} signatures`}
+              className="font-mono text-3xl font-bold tracking-tight tabular-nums md:text-4xl lg:text-4xl xl:text-5xl 2xl:text-6xl leading-none"
+            >
+              {signatureFormatter.format(attrs.signature_count)}
+            </span>
+            <span className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base">
+              Signatures
+            </span>
+          </div>
+        </section>
 
-        <div className="flex items-baseline gap-2 lg:gap-3">
-          <span
-            aria-label={`${signatureFormatter.format(attrs.signature_count)} signatures`}
-            className="font-mono text-3xl font-bold tracking-tight tabular-nums md:text-4xl lg:text-4xl xl:text-5xl 2xl:text-6xl leading-none"
-          >
-            {signatureFormatter.format(attrs.signature_count)}
-          </span>
-          <span className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base">
-            Signatures
-          </span>
-        </div>
-
-        {/* Dynamic area — default search+top10, swaps to detail on click */}
-        <div className="flex flex-1 flex-col gap-4 border-t border-border/50 pt-4 lg:gap-5 lg:pt-5">
+        <section
+          aria-label="Constituency explorer"
+          className="flex flex-1 flex-col gap-4 p-6 md:gap-5 md:p-8 lg:min-h-0 lg:gap-5 lg:overflow-y-auto lg:p-8"
+        >
           {selectedConstituency ? (
             <ConstituencyDetail
               name={selectedConstituency.name}
@@ -167,14 +160,7 @@ export function MapMode({ attrs }: MapModeProps) {
               toggleSelect={toggleSelect}
             />
           )}
-        </div>
-
-        {internationalCount > 0 && (
-          <p className="border-t border-border/50 pt-3 text-xs text-muted-foreground md:text-sm lg:pt-4 lg:text-base">
-            {signatureFormatter.format(internationalCount)} signed from outside
-            the UK
-          </p>
-        )}
+        </section>
       </aside>
     </div>
   );

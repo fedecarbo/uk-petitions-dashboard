@@ -53,7 +53,7 @@ export function ConstituencyDetail({
         onClick={onBack}
         className="-ml-1.5 inline-flex w-fit items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
       >
-        <ArrowLeft aria-hidden className="h-3.5 w-3.5" />
+        <ArrowLeft aria-hidden size={14} />
         Back
       </button>
 
@@ -102,7 +102,7 @@ export function ConstituencyDetail({
         onClick={onZoomHere}
         className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-base"
       >
-        <Locate aria-hidden className="h-3.5 w-3.5" />
+        <Locate aria-hidden size={14} />
         Zoom here
       </button>
     </div>
@@ -173,14 +173,14 @@ function MPContactBlock({ mp }: { mp: ReturnType<typeof useMP> }) {
       <ContactLink
         href={parliamentUrl}
         external
-        icon={<ExternalLink aria-hidden className="h-3.5 w-3.5" />}
+        icon={<ExternalLink aria-hidden size={14} />}
       >
         View on parliament.uk
       </ContactLink>
       {email && (
         <ContactLink
           href={`mailto:${email}`}
-          icon={<Mail aria-hidden className="h-3.5 w-3.5" />}
+          icon={<Mail aria-hidden size={14} />}
         >
           {email}
         </ContactLink>
@@ -188,7 +188,7 @@ function MPContactBlock({ mp }: { mp: ReturnType<typeof useMP> }) {
       {phone && (
         <ContactLink
           href={`tel:${phone.replace(/\s+/g, "")}`}
-          icon={<Phone aria-hidden className="h-3.5 w-3.5" />}
+          icon={<Phone aria-hidden size={14} />}
         >
           {phone}
         </ContactLink>
@@ -197,7 +197,7 @@ function MPContactBlock({ mp }: { mp: ReturnType<typeof useMP> }) {
         <ContactLink
           href={website}
           external
-          icon={<Globe aria-hidden className="h-3.5 w-3.5" />}
+          icon={<Globe aria-hidden size={14} />}
         >
           {prettyHost(website)}
         </ContactLink>
@@ -206,7 +206,7 @@ function MPContactBlock({ mp }: { mp: ReturnType<typeof useMP> }) {
         <ContactLink
           href={twitter}
           external
-          icon={<MessageCircle aria-hidden className="h-3.5 w-3.5" />}
+          icon={<MessageCircle aria-hidden size={14} />}
         >
           {prettyHandle(twitter)}
         </ContactLink>

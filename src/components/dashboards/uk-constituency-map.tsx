@@ -461,7 +461,7 @@ function ZoomControls({
         disabled={zoomedIn}
         onClick={onZoomIn}
       >
-        <Plus aria-hidden className="h-4 w-4" />
+        <Plus aria-hidden size={16} />
       </ZoomButton>
       <ZoomButton
         label="Zoom out"
@@ -469,7 +469,7 @@ function ZoomControls({
         onClick={onZoomOut}
         bordered
       >
-        <Minus aria-hidden className="h-4 w-4" />
+        <Minus aria-hidden size={16} />
       </ZoomButton>
       <ZoomButton
         label="Reset zoom and pan"
@@ -477,7 +477,7 @@ function ZoomControls({
         onClick={onReset}
         bordered
       >
-        <RotateCcw aria-hidden className="h-3.5 w-3.5" />
+        <RotateCcw aria-hidden size={14} />
       </ZoomButton>
     </div>
   );

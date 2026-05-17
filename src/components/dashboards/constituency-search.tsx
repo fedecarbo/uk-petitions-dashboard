@@ -103,10 +103,12 @@ export function ConstituencySearch({
 
   return (
     <div ref={containerRef} className="relative">
-      <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-muted-foreground">
-          <Search aria-hidden className="h-4 w-4" />
-        </span>
+      <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm focus-within:border-ring focus-within:ring-2 focus-within:ring-ring lg:py-2.5 lg:text-base">
+        <Search
+          aria-hidden
+          size={16}
+          className="shrink-0 text-muted-foreground"
+        />
         <input
           ref={inputRef}
           type="text"
@@ -131,16 +133,16 @@ export function ConstituencySearch({
             if (query) setOpen(true);
           }}
           onKeyDown={handleKeyDown}
-          className="w-full rounded-md border border-border bg-card py-2 pr-9 pl-9 text-sm focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring lg:py-2.5 lg:text-base"
+          className="min-w-0 flex-1 bg-transparent focus:outline-none"
         />
         {query && (
           <button
             type="button"
             aria-label="Clear search"
             onClick={clear}
-            className="absolute inset-y-0 right-1 flex items-center justify-center rounded-sm px-2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="-mr-1 flex shrink-0 items-center justify-center rounded-sm p-1 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <X aria-hidden className="h-3.5 w-3.5" />
+            <X aria-hidden size={14} />
           </button>
         )}
       </div>
