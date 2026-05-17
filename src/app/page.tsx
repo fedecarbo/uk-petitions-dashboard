@@ -39,6 +39,18 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      <footer className="flex shrink-0 items-center justify-center text-sm text-muted-foreground md:text-base">
+        Built by{" "}
+        <a
+          href="https://unboxed.co"
+          target="_blank"
+          rel="noreferrer noopener"
+          className="ml-1 font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          Unboxed
+        </a>
+      </footer>
     </main>
   );
 }

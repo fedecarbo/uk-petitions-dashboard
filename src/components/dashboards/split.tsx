@@ -288,6 +288,15 @@ export function DashboardSplit({ id, view }: DashboardSplitProps) {
           ← New search
         </Link>
         <div className="flex items-center gap-3">
+          <a
+            href="https://unboxed.co"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="hidden text-xs text-muted-foreground hover:text-foreground md:inline md:text-sm"
+          >
+            Built by{" "}
+            <span className="font-medium text-foreground">Unboxed</span>
+          </a>
           <LiveIndicator
             lastUpdated={lastUpdated}
             isRefreshing={isRefreshing}
