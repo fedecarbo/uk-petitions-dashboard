@@ -32,7 +32,7 @@ export function StatCarousel({ attrs, history, className }: StatCarouselProps) {
       {
         id: "activity",
         label: "Activity",
-        render: () => <Activity history={history} />,
+        render: () => <Activity attrs={attrs} history={history} />,
       },
     ],
     [attrs, history],

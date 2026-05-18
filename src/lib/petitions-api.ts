@@ -38,6 +38,8 @@ export interface PetitionAttributes {
     transcript_url: string | null;
     video_url: string | null;
     debate_pack_url: string | null;
+    public_engagement_url: string | null;
+    debate_summary_url: string | null;
   } | null;
   signatures_by_country: Array<{
     name: string;
@@ -49,6 +51,26 @@ export interface PetitionAttributes {
     ons_code: string;
     mp: string | null;
     signature_count: number;
+  }>;
+  signatures_by_region: Array<{
+    name: string;
+    ons_code: string;
+    signature_count: number;
+  }>;
+  departments: Array<{
+    name: string;
+    acronym: string | null;
+    url: string | null;
+  }>;
+  topics: Array<{
+    name: string;
+  }>;
+  other_parliamentary_business: Array<{
+    subject: string;
+    body: string | null;
+    occurred_on: string | null;
+    created_at: string;
+    updated_at: string;
   }>;
 }
 
