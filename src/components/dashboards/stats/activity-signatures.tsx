@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { signatureFormatter } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
@@ -45,6 +46,10 @@ const MONTH_FULL_FMT = new Intl.DateTimeFormat("en-GB", {
   month: "long",
   year: "numeric",
 });
+const DAY_MONTH_FMT = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+});
 
 interface Bar {
   value: number;
@@ -74,88 +79,118 @@ function startOfDay(ts: number): number {
   return d.getTime();
 }
 
-function buildDay(
-  now: number,
+// Move the anchor backward by `offset` periods of the given range. Month
+// arithmetic uses day 15 as the safe anchor so 31 May → 30 Apr doesn't bleed.
+function computeAnchor(
+  captured: number,
+  range: Range,
+  offset: number,
+): number {
+  const d = new Date(captured);
+  if (range === "day") {
+    d.setDate(d.getDate() - offset);
+  } else if (range === "week") {
+    d.setDate(d.getDate() - offset * 7);
+  } else {
+    d.setDate(15);
+    d.setMonth(d.getMonth() - (range === "month" ? offset : offset * 6));
+  }
+  return d.getTime();
+}
+
+// A bar slot is in-window when it overlaps the petition's open period and
+// lies at or before the capture moment. The anchor only decides which slots
+// to draw; the petition's own bounds decide which of those have data.
+function isInWindow(
+  slotStart: number,
+  slotEnd: number,
   opened: number,
   closed: number | null,
+  captured: number,
+): boolean {
+  if (slotEnd <= opened) return false;
+  if (slotStart > captured) return false;
+  if (closed !== null && slotStart > closed) return false;
+  return true;
+}
+
+function buildDay(
+  anchor: number,
+  opened: number,
+  closed: number | null,
+  captured: number,
 ): Bar[] {
-  const today = FULL_FMT.format(new Date(now));
-  const currentHour = new Date(now).getHours();
-  const dayStart = startOfDay(now);
+  const today = FULL_FMT.format(new Date(anchor));
+  const dayStart = startOfDay(anchor);
   return Array.from({ length: 24 }, (_, i) => {
     const slotStart = dayStart + i * HOUR_MS;
     const slotEnd = slotStart + HOUR_MS;
-    const isFuture = i > currentHour;
-    const isBeforeOpen = slotEnd <= opened;
-    const isAfterClose = closed !== null && slotStart > closed;
-    const inWindow = !isFuture && !isBeforeOpen && !isAfterClose;
+    const inWindow = isInWindow(slotStart, slotEnd, opened, closed, captured);
     const value = inWindow ? sumInRange(slotStart, slotEnd) : 0;
     return { value, fullLabel: `${hourLabel(i)}, ${today}`, inWindow };
   });
 }
 
 function buildWeek(
-  now: number,
+  anchor: number,
   opened: number,
   closed: number | null,
+  captured: number,
 ): Bar[] {
-  const weekStart = startOfWeekMon(now);
-  const todayStart = startOfDay(now);
+  const weekStart = startOfWeekMon(anchor);
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(weekStart);
     d.setDate(d.getDate() + i);
     d.setHours(12, 0, 0, 0);
     const dStart = startOfDay(d.getTime());
     const dEnd = dStart + DAY_MS;
-    const isFuture = dStart > todayStart;
-    const isBeforeOpen = dEnd <= opened;
-    const isAfterClose = closed !== null && dStart > closed;
-    const inWindow = !isFuture && !isBeforeOpen && !isAfterClose;
+    const inWindow = isInWindow(dStart, dEnd, opened, closed, captured);
     const value = inWindow ? sumInRange(dStart, dEnd) : 0;
     return { value, fullLabel: FULL_FMT.format(d), inWindow };
   });
 }
 
 function buildMonth(
-  now: number,
+  anchor: number,
   opened: number,
   closed: number | null,
+  captured: number,
 ): Bar[] {
-  const nowDate = new Date(now);
-  const year = nowDate.getFullYear();
-  const month = nowDate.getMonth();
+  const anchorDate = new Date(anchor);
+  const year = anchorDate.getFullYear();
+  const month = anchorDate.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const todayStart = startOfDay(now);
   return Array.from({ length: daysInMonth }, (_, i) => {
     const day = i + 1;
     const d = new Date(year, month, day, 12, 0, 0, 0);
     const dStart = startOfDay(d.getTime());
     const dEnd = dStart + DAY_MS;
-    const isFuture = dStart > todayStart;
-    const isBeforeOpen = dEnd <= opened;
-    const isAfterClose = closed !== null && dStart > closed;
-    const inWindow = !isFuture && !isBeforeOpen && !isAfterClose;
+    const inWindow = isInWindow(dStart, dEnd, opened, closed, captured);
     const value = inWindow ? sumInRange(dStart, dEnd) : 0;
     return { value, fullLabel: FULL_FMT.format(d), inWindow };
   });
 }
 
 function buildSixMonths(
-  now: number,
+  anchor: number,
   opened: number,
   closed: number | null,
+  captured: number,
 ): Bar[] {
-  const nowDate = new Date(now);
-  const year = nowDate.getFullYear();
-  const currentMonth = nowDate.getMonth();
+  const anchorDate = new Date(anchor);
+  const year = anchorDate.getFullYear();
+  const currentMonth = anchorDate.getMonth();
   return Array.from({ length: 6 }, (_, i) => {
     const monthOffset = 5 - i;
     const monthStart = new Date(year, currentMonth - monthOffset, 1, 0, 0, 0);
     const monthEnd = new Date(year, currentMonth - monthOffset + 1, 1, 0, 0, 0);
-    const isFuture = monthStart.getTime() > now;
-    const isBeforeOpen = monthEnd.getTime() <= opened;
-    const isAfterClose = closed !== null && monthStart.getTime() > closed;
-    const inWindow = !isFuture && !isBeforeOpen && !isAfterClose;
+    const inWindow = isInWindow(
+      monthStart.getTime(),
+      monthEnd.getTime(),
+      opened,
+      closed,
+      captured,
+    );
     const value = inWindow
       ? sumInRange(monthStart.getTime(), monthEnd.getTime())
       : 0;
@@ -167,7 +202,7 @@ function buildSixMonths(
   });
 }
 
-function axisLabels(range: Range, now: number): string[] {
+function axisLabels(range: Range, anchor: number): string[] {
   if (range === "day") {
     return ["12am", "6am", "noon", "6pm", "11pm"];
   }
@@ -175,50 +210,76 @@ function axisLabels(range: Range, now: number): string[] {
     return DAY_NAMES_MON_FIRST;
   }
   if (range === "month") {
-    const nowDate = new Date(now);
+    const d = new Date(anchor);
     const daysInMonth = new Date(
-      nowDate.getFullYear(),
-      nowDate.getMonth() + 1,
+      d.getFullYear(),
+      d.getMonth() + 1,
       0,
     ).getDate();
     return ["1", "8", "15", "22", String(daysInMonth)];
   }
   // sixMonths
-  const nowDate = new Date(now);
-  const year = nowDate.getFullYear();
-  const currentMonth = nowDate.getMonth();
+  const d = new Date(anchor);
+  const year = d.getFullYear();
+  const currentMonth = d.getMonth();
   return Array.from({ length: 6 }, (_, i) => {
-    const d = new Date(year, currentMonth - (5 - i), 1);
-    return MONTH_NAMES_SHORT[d.getMonth()];
+    const m = new Date(year, currentMonth - (5 - i), 1);
+    return MONTH_NAMES_SHORT[m.getMonth()];
   });
 }
 
-function totalCaptionOf(range: Range): string {
-  if (range === "day") return "Today";
-  if (range === "week") return "This week";
-  if (range === "month") return "This month";
-  return "In the last 6 months";
+function periodLabel(range: Range, anchor: number): string {
+  if (range === "day") {
+    return FULL_FMT.format(new Date(anchor));
+  }
+  if (range === "week") {
+    return `Week of ${DAY_MONTH_FMT.format(startOfWeekMon(anchor))}`;
+  }
+  if (range === "month") {
+    return MONTH_FULL_FMT.format(new Date(anchor));
+  }
+  // sixMonths — first month of the window through the anchor month.
+  const d = new Date(anchor);
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  const first = new Date(year, month - 5, 1);
+  const last = new Date(year, month, 1);
+  return `${MONTH_NAMES_SHORT[first.getMonth()]} ${first.getFullYear()} – ${MONTH_NAMES_SHORT[last.getMonth()]} ${last.getFullYear()}`;
+}
+
+// End-of-window timestamp for the period starting at `anchor` (used to decide
+// whether stepping further back still touches the petition's open span).
+function periodEnd(range: Range, anchor: number): number {
+  if (range === "day") {
+    return startOfDay(anchor) + DAY_MS;
+  }
+  if (range === "week") {
+    return startOfWeekMon(anchor).getTime() + 7 * DAY_MS;
+  }
+  // month / sixMonths — end of the anchor's month (the rightmost bar).
+  const d = new Date(anchor);
+  return new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime();
 }
 
 export function ActivitySignaturesOverTime() {
   const [range, setRange] = useState<Range>("day");
+  const [periodOffset, setPeriodOffset] = useState(0);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
 
-  // Anchor to the capture moment rather than wall-clock now, so the chart
-  // reads as a self-consistent snapshot regardless of when the dashboard is
-  // viewed.
-  const now = PETITION_TIMELINE_META.captured_at;
+  const captured = PETITION_TIMELINE_META.captured_at;
   const opened = PETITION_TIMELINE_META.opened_at;
   const closed = PETITION_TIMELINE_META.closed_at;
 
+  const anchor = computeAnchor(captured, range, periodOffset);
+
   const bars =
     range === "day"
-      ? buildDay(now, opened, closed)
+      ? buildDay(anchor, opened, closed, captured)
       : range === "week"
-        ? buildWeek(now, opened, closed)
+        ? buildWeek(anchor, opened, closed, captured)
         : range === "month"
-          ? buildMonth(now, opened, closed)
-          : buildSixMonths(now, opened, closed);
+          ? buildMonth(anchor, opened, closed, captured)
+          : buildSixMonths(anchor, opened, closed, captured);
 
   const max = Math.max(...bars.map((b) => (b.inWindow ? b.value : 0)), 1);
   const total = bars.reduce((s, b) => s + b.value, 0);
@@ -234,6 +295,21 @@ export function ActivitySignaturesOverTime() {
   const isHovering = hoverIdx !== null;
   const hovered = isHovering ? bars[hoverIdx] : null;
 
+  const canStepForward = periodOffset > 0;
+  const nextBackAnchor = computeAnchor(captured, range, periodOffset + 1);
+  const canStepBack = periodEnd(range, nextBackAnchor) > opened;
+
+  const stepBack = () => {
+    if (!canStepBack) return;
+    setPeriodOffset((o) => o + 1);
+    setHoverIdx(null);
+  };
+  const stepForward = () => {
+    if (!canStepForward) return;
+    setPeriodOffset((o) => Math.max(0, o - 1));
+    setHoverIdx(null);
+  };
+
   return (
     <section className={cn(sectionShell, "gap-4")}>
       <div className="flex items-center justify-between gap-2">
@@ -246,26 +322,23 @@ export function ActivitySignaturesOverTime() {
         onChange={(v) => {
           setRange(v);
           setHoverIdx(null);
+          setPeriodOffset(0);
         }}
       />
 
       <div className="flex flex-col gap-1">
-        <div className="flex items-baseline gap-2">
-          <span className="font-mono text-3xl font-bold leading-none tabular-nums md:text-4xl">
+        <PeriodNavigator
+          label={periodLabel(range, anchor)}
+          canStepBack={canStepBack}
+          canStepForward={canStepForward}
+          onStepBack={stepBack}
+          onStepForward={stepForward}
+        />
+        <p className="text-sm text-muted-foreground md:text-base">
+          <span className="font-mono font-semibold tabular-nums text-foreground">
             {signatureFormatter.format(total)}
-          </span>
-          <span className="text-xs text-muted-foreground md:text-sm">
-            signatures
-          </span>
-        </div>
-        <p className="text-xs leading-snug text-muted-foreground md:text-sm">
-          {totalCaptionOf(range)}
-          {peak.value > 0 && (
-            <span className="text-muted-foreground/70">
-              {" · "}Peak — {peak.fullLabel} (
-              {signatureFormatter.format(peak.value)} signatures)
-            </span>
-          )}
+          </span>{" "}
+          signatures
         </p>
       </div>
 
@@ -307,7 +380,7 @@ export function ActivitySignaturesOverTime() {
           })}
         </div>
         <div className="flex justify-between text-[10px] tabular-nums text-muted-foreground/70 md:text-xs">
-          {axisLabels(range, now).map((l, i) => (
+          {axisLabels(range, anchor).map((l, i) => (
             <span key={`${l}-${i}`}>{l}</span>
           ))}
         </div>
@@ -316,9 +389,78 @@ export function ActivitySignaturesOverTime() {
       <p className="text-[11px] leading-snug text-muted-foreground/70 md:text-xs">
         {hovered
           ? `${hovered.fullLabel} — ${signatureFormatter.format(hovered.value)} signatures`
-          : "Hover the bars to see other dates."}
+          : peak.value > 0
+            ? `Peak — ${peak.fullLabel} (${signatureFormatter.format(peak.value)} signatures)`
+            : "No signatures in this period"}
       </p>
     </section>
+  );
+}
+
+function PeriodNavigator({
+  label,
+  canStepBack,
+  canStepForward,
+  onStepBack,
+  onStepForward,
+}: {
+  label: string;
+  canStepBack: boolean;
+  canStepForward: boolean;
+  onStepBack: () => void;
+  onStepForward: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-2xl font-bold leading-none tabular-nums">
+        {label}
+      </span>
+      <div className="flex items-center gap-1">
+        <NavButton
+          ariaLabel="Previous period"
+          disabled={!canStepBack}
+          onClick={onStepBack}
+        >
+          <ChevronLeft size={16} />
+        </NavButton>
+        <NavButton
+          ariaLabel="Next period"
+          disabled={!canStepForward}
+          onClick={onStepForward}
+        >
+          <ChevronRight size={16} />
+        </NavButton>
+      </div>
+    </div>
+  );
+}
+
+function NavButton({
+  ariaLabel,
+  disabled,
+  onClick,
+  children,
+}: {
+  ariaLabel: string;
+  disabled: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      disabled={disabled}
+      onClick={onClick}
+      className={cn(
+        "inline-flex size-7 items-center justify-center rounded-md border border-border/70 text-muted-foreground transition-colors",
+        disabled
+          ? "cursor-not-allowed opacity-40"
+          : "hover:bg-muted/50 hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -366,7 +508,7 @@ function PreviewBadge() {
       title="Real captured timeline for petition 751472, used as a single example regardless of which petition is loaded."
     >
       <span aria-hidden className="size-1 rounded-full bg-muted-foreground/60" />
-      Preview
+      Sample data
     </span>
   );
 }
