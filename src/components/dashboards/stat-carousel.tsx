@@ -2,14 +2,12 @@
 
 import { useMemo, useState } from "react";
 import type { PetitionAttributes } from "@/lib/petitions-api";
-import type { PetitionHistorySample } from "@/hooks/use-petition";
 import { cn } from "@/lib/utils";
 import { PetitionProgress } from "@/components/dashboards/stats/petition-progress";
 import { Activity } from "@/components/dashboards/stats/activity";
 
 interface StatCarouselProps {
   attrs: PetitionAttributes;
-  history: PetitionHistorySample[];
   className?: string;
 }
 
@@ -19,7 +17,7 @@ interface CardDef {
   render: () => React.ReactNode;
 }
 
-export function StatCarousel({ attrs, history, className }: StatCarouselProps) {
+export function StatCarousel({ attrs, className }: StatCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const cards = useMemo<CardDef[]>(
@@ -32,10 +30,10 @@ export function StatCarousel({ attrs, history, className }: StatCarouselProps) {
       {
         id: "activity",
         label: "Activity",
-        render: () => <Activity attrs={attrs} history={history} />,
+        render: () => <Activity attrs={attrs} />,
       },
     ],
-    [attrs, history],
+    [attrs],
   );
 
   const activeCard = cards[activeIndex];

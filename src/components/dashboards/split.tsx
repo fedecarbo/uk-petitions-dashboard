@@ -20,7 +20,6 @@ import { usePetition } from "@/hooks/use-petition";
 import { formatDateShort } from "@/lib/format-date";
 import { signatureFormatter } from "@/lib/format";
 import type { PetitionAttributes } from "@/lib/petitions-api";
-import type { PetitionHistorySample } from "@/hooks/use-petition";
 import {
   isPetitionClosed,
   journeyProgress,
@@ -189,13 +188,7 @@ function AdditionalDetails({ text }: { text: string }) {
   );
 }
 
-function StatsBody({
-  attrs,
-  history,
-}: {
-  attrs: PetitionAttributes;
-  history: PetitionHistorySample[];
-}) {
+function StatsBody({ attrs }: { attrs: PetitionAttributes }) {
   return (
     <div className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
       <section className="flex min-w-0 flex-col border-b border-border lg:grid lg:grid-rows-[2fr_1fr] lg:border-b-0 lg:border-r lg:min-h-0 lg:overflow-hidden">
@@ -237,14 +230,14 @@ function StatsBody({
         aria-label="Petition statistics"
         className="min-h-[320px] lg:min-h-0 lg:overflow-hidden"
       >
-        <StatCarousel attrs={attrs} history={history} className="h-full" />
+        <StatCarousel attrs={attrs} className="h-full" />
       </aside>
     </div>
   );
 }
 
 export function DashboardSplit({ id, view }: DashboardSplitProps) {
-  const { state, lastUpdated, isRefreshing, history } = usePetition(id);
+  const { state, lastUpdated, isRefreshing } = usePetition(id);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -298,7 +291,7 @@ export function DashboardSplit({ id, view }: DashboardSplitProps) {
         {view === "map" ? (
           <MapMode attrs={attrs} />
         ) : (
-          <StatsBody attrs={attrs} history={history} />
+          <StatsBody attrs={attrs} />
         )}
       </div>
     </main>
