@@ -2,6 +2,7 @@
 
 import type { PetitionAttributes } from "@/lib/petitions-api";
 import { formatDateShort } from "@/lib/format-date";
+import { isPetitionClosed } from "@/lib/petition-thresholds";
 import { SectionHeading, sectionShell } from "./section-heading";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +23,12 @@ export function ActivityContext({ attrs }: Props) {
     })
     .slice(0, RELATED_MAX);
 
+  const closed = isPetitionClosed(attrs);
+  const closeDate = closed ? attrs.closed_at : attrs.closing_date;
+
   if (
+    !attrs.opened_at &&
+    !closeDate &&
     departments.length === 0 &&
     topics.length === 0 &&
     related.length === 0
@@ -35,6 +41,20 @@ export function ActivityContext({ attrs }: Props) {
       <SectionHeading>About</SectionHeading>
 
       <dl className="flex flex-col gap-3 text-xs md:text-sm">
+        {attrs.opened_at && (
+          <Row label="Opened">
+            <span className="text-foreground">
+              {formatDateShort(attrs.opened_at)}
+            </span>
+          </Row>
+        )}
+
+        {closeDate && (
+          <Row label={closed ? "Closed" : "Closes"}>
+            <span className="text-foreground">{formatDateShort(closeDate)}</span>
+          </Row>
+        )}
+
         {departments.length > 0 && (
           <Row label={departments.length === 1 ? "Department" : "Departments"}>
             <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1">

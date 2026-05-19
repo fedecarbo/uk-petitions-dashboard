@@ -59,3 +59,55 @@ export function sumInRange(fromMs: number, toMs: number): number {
   }
   return total;
 }
+
+function startOfDay(ts: number): number {
+  const d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
+function startOfMonth(ts: number): number {
+  const d = new Date(ts);
+  return new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+}
+
+// Walks the captured hourly map once and returns the day with the highest
+// total signatures. Day boundaries are local-time midnights — same convention
+// the chart uses for its day/week/month bars.
+export function peakDay(): { ts: number; total: number } | null {
+  const map = init();
+  if (map.size === 0) return null;
+  const totals = new Map<number, number>();
+  for (const [t, c] of map) {
+    const key = startOfDay(t);
+    totals.set(key, (totals.get(key) ?? 0) + c);
+  }
+  let bestTs = 0;
+  let bestTotal = -1;
+  for (const [t, total] of totals) {
+    if (total > bestTotal) {
+      bestTs = t;
+      bestTotal = total;
+    }
+  }
+  return { ts: bestTs, total: bestTotal };
+}
+
+export function peakMonth(): { ts: number; total: number } | null {
+  const map = init();
+  if (map.size === 0) return null;
+  const totals = new Map<number, number>();
+  for (const [t, c] of map) {
+    const key = startOfMonth(t);
+    totals.set(key, (totals.get(key) ?? 0) + c);
+  }
+  let bestTs = 0;
+  let bestTotal = -1;
+  for (const [t, total] of totals) {
+    if (total > bestTotal) {
+      bestTs = t;
+      bestTotal = total;
+    }
+  }
+  return { ts: bestTs, total: bestTotal };
+}

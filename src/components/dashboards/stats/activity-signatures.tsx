@@ -8,9 +8,9 @@ import {
   PETITION_TIMELINE_META,
   sumInRange,
 } from "@/lib/petition-timeline";
-import { SectionHeading, sectionShell } from "./section-heading";
+import { SampleBadge, SectionHeading, sectionShell } from "./section-heading";
 
-type Range = "day" | "week" | "month" | "sixMonths";
+export type Range = "day" | "week" | "month" | "sixMonths";
 
 const RANGES: Array<{ id: Range; label: string }> = [
   { id: "day", label: "Day" },
@@ -268,13 +268,13 @@ function periodLabel(range: Range, anchor: number): string {
 // Offsets used when drilling from a larger range into a smaller one — both
 // measured backward from the capture moment so they slot straight into
 // `setPeriodOffset` for the target range.
-function dayOffsetFrom(captured: number, target: number): number {
+export function dayOffsetFrom(captured: number, target: number): number {
   const cap = startOfDay(captured);
   const tgt = startOfDay(target);
   return Math.max(0, Math.round((cap - tgt) / DAY_MS));
 }
 
-function monthOffsetFrom(captured: number, target: number): number {
+export function monthOffsetFrom(captured: number, target: number): number {
   const cap = new Date(captured);
   const tgt = new Date(target);
   return Math.max(
@@ -298,9 +298,19 @@ function periodEnd(range: Range, anchor: number): number {
   return new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime();
 }
 
-export function ActivitySignaturesOverTime() {
-  const [range, setRange] = useState<Range>("day");
-  const [periodOffset, setPeriodOffset] = useState(0);
+interface ActivitySignaturesOverTimeProps {
+  range: Range;
+  setRange: (r: Range) => void;
+  periodOffset: number;
+  setPeriodOffset: (n: number | ((prev: number) => number)) => void;
+}
+
+export function ActivitySignaturesOverTime({
+  range,
+  setRange,
+  periodOffset,
+  setPeriodOffset,
+}: ActivitySignaturesOverTimeProps) {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
 
   const captured = PETITION_TIMELINE_META.captured_at;
@@ -365,7 +375,7 @@ export function ActivitySignaturesOverTime() {
     <section className={cn(sectionShell, "gap-4")}>
       <div className="flex items-center justify-between gap-2">
         <SectionHeading>Signatures over time</SectionHeading>
-        <PreviewBadge />
+        <SampleBadge />
       </div>
 
       <RangeToggle
@@ -571,14 +581,3 @@ function RangeToggle({
   );
 }
 
-function PreviewBadge() {
-  return (
-    <span
-      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border/70 px-1.5 py-0 text-[10px] leading-4 font-medium text-muted-foreground"
-      title="Real captured timeline for petition 751472, used as a single example regardless of which petition is loaded."
-    >
-      <span aria-hidden className="size-1 rounded-full bg-muted-foreground/60" />
-      Sample data
-    </span>
-  );
-}
