@@ -55,6 +55,8 @@ interface Bar {
   value: number;
   fullLabel: string;
   inWindow: boolean;
+  // Start-of-slot timestamp — drives click-to-drill navigation.
+  ts: number;
 }
 
 function hourLabel(h: number): string {
@@ -127,7 +129,12 @@ function buildDay(
     const slotEnd = slotStart + HOUR_MS;
     const inWindow = isInWindow(slotStart, slotEnd, opened, closed, captured);
     const value = inWindow ? sumInRange(slotStart, slotEnd) : 0;
-    return { value, fullLabel: `${hourLabel(i)}, ${today}`, inWindow };
+    return {
+      value,
+      fullLabel: `${hourLabel(i)}, ${today}`,
+      inWindow,
+      ts: slotStart,
+    };
   });
 }
 
@@ -146,7 +153,12 @@ function buildWeek(
     const dEnd = dStart + DAY_MS;
     const inWindow = isInWindow(dStart, dEnd, opened, closed, captured);
     const value = inWindow ? sumInRange(dStart, dEnd) : 0;
-    return { value, fullLabel: FULL_FMT.format(d), inWindow };
+    return {
+      value,
+      fullLabel: FULL_FMT.format(d),
+      inWindow,
+      ts: dStart,
+    };
   });
 }
 
@@ -167,7 +179,12 @@ function buildMonth(
     const dEnd = dStart + DAY_MS;
     const inWindow = isInWindow(dStart, dEnd, opened, closed, captured);
     const value = inWindow ? sumInRange(dStart, dEnd) : 0;
-    return { value, fullLabel: FULL_FMT.format(d), inWindow };
+    return {
+      value,
+      fullLabel: FULL_FMT.format(d),
+      inWindow,
+      ts: dStart,
+    };
   });
 }
 
@@ -198,6 +215,7 @@ function buildSixMonths(
       value,
       fullLabel: MONTH_FULL_FMT.format(monthStart),
       inWindow,
+      ts: monthStart.getTime(),
     };
   });
 }
@@ -245,6 +263,25 @@ function periodLabel(range: Range, anchor: number): string {
   const first = new Date(year, month - 5, 1);
   const last = new Date(year, month, 1);
   return `${MONTH_NAMES_SHORT[first.getMonth()]} ${first.getFullYear()} – ${MONTH_NAMES_SHORT[last.getMonth()]} ${last.getFullYear()}`;
+}
+
+// Offsets used when drilling from a larger range into a smaller one — both
+// measured backward from the capture moment so they slot straight into
+// `setPeriodOffset` for the target range.
+function dayOffsetFrom(captured: number, target: number): number {
+  const cap = startOfDay(captured);
+  const tgt = startOfDay(target);
+  return Math.max(0, Math.round((cap - tgt) / DAY_MS));
+}
+
+function monthOffsetFrom(captured: number, target: number): number {
+  const cap = new Date(captured);
+  const tgt = new Date(target);
+  return Math.max(
+    0,
+    (cap.getFullYear() - tgt.getFullYear()) * 12 +
+      (cap.getMonth() - tgt.getMonth()),
+  );
 }
 
 // End-of-window timestamp for the period starting at `anchor` (used to decide
@@ -310,6 +347,20 @@ export function ActivitySignaturesOverTime() {
     setHoverIdx(null);
   };
 
+  const drillDown = (barTs: number) => {
+    if (range === "day") return;
+    const targetRange: Range = range === "sixMonths" ? "month" : "day";
+    const offset =
+      targetRange === "month"
+        ? monthOffsetFrom(captured, barTs)
+        : dayOffsetFrom(captured, barTs);
+    setRange(targetRange);
+    setPeriodOffset(offset);
+    setHoverIdx(null);
+  };
+
+  const canDrill = range !== "day";
+
   return (
     <section className={cn(sectionShell, "gap-4")}>
       <div className="flex items-center justify-between gap-2">
@@ -361,6 +412,11 @@ export function ActivitySignaturesOverTime() {
             const isPeak = i === peakIdx;
             const isHovered = hoverIdx === i;
             const opacity = isHovered ? 1 : isPeak ? 0.9 : 0.55;
+            const drillLabel = canDrill
+              ? range === "sixMonths"
+                ? `: open ${b.fullLabel}`
+                : `: open this day`
+              : "";
             return (
               <div
                 key={i}
@@ -369,8 +425,22 @@ export function ActivitySignaturesOverTime() {
                 onMouseEnter={() => setHoverIdx(i)}
                 onFocus={() => setHoverIdx(i)}
                 onBlur={() => setHoverIdx(null)}
-                aria-label={`${b.fullLabel}: ${signatureFormatter.format(b.value)} signatures`}
-                className="flex-1 cursor-pointer rounded-[1px] bg-foreground transition-[opacity,height] duration-200"
+                onClick={canDrill ? () => drillDown(b.ts) : undefined}
+                onKeyDown={
+                  canDrill
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          drillDown(b.ts);
+                        }
+                      }
+                    : undefined
+                }
+                aria-label={`${b.fullLabel}: ${signatureFormatter.format(b.value)} signatures${drillLabel}`}
+                className={cn(
+                  "flex-1 rounded-[1px] bg-foreground transition-[opacity,height] duration-200",
+                  canDrill ? "cursor-pointer" : "cursor-default",
+                )}
                 style={{
                   height: `${Math.max(6, (b.value / max) * 100)}%`,
                   opacity,
