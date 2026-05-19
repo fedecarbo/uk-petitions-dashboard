@@ -37,12 +37,21 @@ const TREND_GLYPH: Record<Trend, string> = {
   slowing: "↘",
 };
 
-function compareWord(ratio: number): string {
-  if (ratio >= 1.5) return "much faster than the lifetime average";
-  if (ratio >= 1.2) return "noticeably faster than the lifetime average";
-  if (ratio >= 0.85) return "in line with the lifetime average";
-  if (ratio >= 0.5) return "noticeably slower than the lifetime average";
-  return "much slower than the lifetime average";
+function compareSentence(ratio: number, lifetimePerDay: number): string {
+  const base = signatureFormatter.format(lifetimePerDay);
+  if (ratio >= 1.5) {
+    return `Much faster than the lifetime average of ${base} a day.`;
+  }
+  if (ratio >= 1.2) {
+    return `Noticeably faster than the lifetime average of ${base} a day.`;
+  }
+  if (ratio >= 0.85) {
+    return `In line with the lifetime average of ${base} a day.`;
+  }
+  if (ratio >= 0.5) {
+    return `Noticeably slower than the lifetime average of ${base} a day.`;
+  }
+  return `Much slower than the lifetime average of ${base} a day.`;
 }
 
 export function ActivityPace({ attrs, history }: Props) {
@@ -70,31 +79,9 @@ export function ActivityPace({ attrs, history }: Props) {
       : null;
   const trend = trendOf(ratio);
 
-  const era10k = (() => {
-    const t = parseMs(attrs.response_threshold_reached_at);
-    if (!t || t <= opened) return null;
-    const daysToReach = Math.max(1, (t - opened) / DAY_MS);
-    const before = Math.round(10_000 / daysToReach);
-    const daysSince = Math.max(0.5, (endMs - t) / DAY_MS);
-    const after = Math.round(
-      Math.max(0, attrs.signature_count - 10_000) / daysSince,
-    );
-    return { before, after };
-  })();
-
-  const era100k = (() => {
-    const t = parseMs(attrs.debate_threshold_reached_at);
-    if (!t || t <= opened) return null;
-    const daysSince = Math.max(0.5, (endMs - t) / DAY_MS);
-    const after = Math.round(
-      Math.max(0, attrs.signature_count - 100_000) / daysSince,
-    );
-    return { after };
-  })();
-
   return (
     <section className={cn(sectionShell, "gap-5")}>
-      <SectionHeading>Pace</SectionHeading>
+      <SectionHeading>Rate</SectionHeading>
 
       <PaceChart
         history={history}
@@ -105,30 +92,9 @@ export function ActivityPace({ attrs, history }: Props) {
 
       {livePerHour !== null && livePerHour > 0 && ratio !== null && (
         <p className="text-xs leading-snug text-muted-foreground md:text-sm">
-          {compareWord(ratio)}.
+          {compareSentence(ratio, lifetimePerDay)}
         </p>
       )}
-
-      <dl className="flex flex-col gap-1.5 border-t border-border/60 pt-4 text-xs leading-snug text-muted-foreground md:text-sm">
-        <Line
-          label="Lifetime average"
-          value={`${signatureFormatter.format(lifetimePerDay)} / day`}
-          aside={`over ${Math.round(daysOpen).toLocaleString("en-GB")} days`}
-        />
-        {era10k && (
-          <Line
-            label="Before 10,000"
-            value={`${signatureFormatter.format(era10k.before)} / day`}
-            aside={`then ${signatureFormatter.format(era10k.after)} / day`}
-          />
-        )}
-        {era100k && (
-          <Line
-            label="Since 100,000"
-            value={`${signatureFormatter.format(era100k.after)} / day`}
-          />
-        )}
-      </dl>
     </section>
   );
 }
@@ -240,31 +206,5 @@ function Sparkline({ history }: { history: PetitionHistorySample[] }) {
         vectorEffect="non-scaling-stroke"
       />
     </svg>
-  );
-}
-
-function Line({
-  label,
-  value,
-  aside,
-}: {
-  label: string;
-  value: string;
-  aside?: string;
-}) {
-  return (
-    <div className="flex items-baseline justify-between gap-3">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="flex items-baseline gap-2 text-right">
-        <span className="font-mono font-semibold tabular-nums text-foreground">
-          {value}
-        </span>
-        {aside && (
-          <span className="text-[11px] text-muted-foreground/80 md:text-xs">
-            {aside}
-          </span>
-        )}
-      </span>
-    </div>
   );
 }

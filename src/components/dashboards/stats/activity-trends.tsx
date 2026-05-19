@@ -6,13 +6,18 @@ import { signatureFormatter } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { SectionHeading, sectionShell } from "./section-heading";
 
-type Range = "day" | "week" | "month";
+type Range = "day" | "week" | "month" | "lifetime";
 
 const RANGES: Array<{ id: Range; label: string }> = [
   { id: "day", label: "Day" },
   { id: "week", label: "Week" },
   { id: "month", label: "Month" },
+  { id: "lifetime", label: "Lifetime" },
 ];
+
+// Above this many days open, switch the Lifetime view from one bar per day to
+// one bar per week so bars stay readable in the narrow panel.
+const LIFETIME_WEEKLY_THRESHOLD = 60;
 
 // Daily rhythm: low overnight, two daytime peaks, evening crest.
 const HOUR_WEIGHTS = [
@@ -110,7 +115,48 @@ function buildMonth(dailyAvg: number, seed: number, now: number): Bar[] {
   });
 }
 
-function axisLabels(range: Range, now: number): string[] {
+function buildLifetime(
+  dailyAvg: number,
+  seed: number,
+  now: number,
+  openedAt: number,
+): Bar[] {
+  const totalDays = Math.max(1, Math.floor((now - openedAt) / DAY_MS));
+
+  // Short petitions: one bar per day. Long ones: one bar per week so bars
+  // don't end up 1px wide in the narrow panel.
+  if (totalDays <= LIFETIME_WEEKLY_THRESHOLD) {
+    return Array.from({ length: totalDays }, (_, i) => {
+      const d = new Date(openedAt);
+      d.setDate(d.getDate() + i);
+      d.setHours(12, 0, 0, 0);
+      const dow = d.getDay();
+      const weeklyW = DAY_WEIGHTS[dow];
+      const drift = noiseAt(seed, i + 200, 0.32);
+      const value = Math.max(0, Math.round(dailyAvg * weeklyW * (1 + drift)));
+      return { value, fullLabel: FULL_FMT.format(d) };
+    });
+  }
+
+  const totalWeeks = Math.ceil(totalDays / 7);
+  return Array.from({ length: totalWeeks }, (_, i) => {
+    const d = new Date(openedAt);
+    d.setDate(d.getDate() + i * 7);
+    d.setHours(12, 0, 0, 0);
+    const drift = noiseAt(seed, i + 200, 0.25);
+    const value = Math.max(0, Math.round(dailyAvg * 7 * (1 + drift)));
+    return {
+      value,
+      fullLabel: `Week of ${SHORT_FMT.format(d)}`,
+    };
+  });
+}
+
+function axisLabels(
+  range: Range,
+  now: number,
+  openedAt: number,
+): string[] {
   if (range === "day") {
     return ["12am", "6am", "noon", "6pm", "11pm"];
   }
@@ -121,9 +167,17 @@ function axisLabels(range: Range, now: number): string[] {
       return DAY_NAMES_SHORT[d.getDay()];
     });
   }
-  return [29, 22, 15, 7, 0].map((offset) => {
-    const d = new Date(now);
-    d.setDate(d.getDate() - offset);
+  if (range === "month") {
+    return [29, 22, 15, 7, 0].map((offset) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() - offset);
+      return SHORT_FMT.format(d);
+    });
+  }
+  // lifetime — five evenly spaced dates from opened to now
+  const totalMs = now - openedAt;
+  return [0, 0.25, 0.5, 0.75, 1].map((t) => {
+    const d = new Date(openedAt + totalMs * t);
     return SHORT_FMT.format(d);
   });
 }
@@ -131,7 +185,8 @@ function axisLabels(range: Range, now: number): string[] {
 function totalCaptionOf(range: Range): string {
   if (range === "day") return "today";
   if (range === "week") return "this week";
-  return "in the last 30 days";
+  if (range === "month") return "in the last 30 days";
+  return "since the petition opened";
 }
 
 export function ActivityTrends({ attrs }: Props) {
@@ -156,7 +211,9 @@ export function ActivityTrends({ attrs }: Props) {
       ? buildDay(dailyAvg, seed, now)
       : range === "week"
         ? buildWeek(dailyAvg, seed, now)
-        : buildMonth(dailyAvg, seed, now);
+        : range === "month"
+          ? buildMonth(dailyAvg, seed, now)
+          : buildLifetime(dailyAvg, seed, now, opened);
 
   const max = Math.max(...bars.map((b) => b.value), 1);
   const total = bars.reduce((s, b) => s + b.value, 0);
@@ -209,37 +266,34 @@ export function ActivityTrends({ attrs }: Props) {
 
       <div className="flex flex-col gap-2">
         <div
-          className="flex h-20 items-end gap-0.5 md:h-24"
+          className="flex h-24 items-end gap-[2px] md:h-28"
           onMouseLeave={() => setHoverIdx(null)}
         >
           {bars.map((b, i) => {
             const isPeak = i === peakIdx;
             const isHovered = hoverIdx === i;
+            const opacity = isHovered ? 1 : isPeak ? 0.7 : 0.35;
             return (
-              <button
+              <div
                 key={i}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onMouseEnter={() => setHoverIdx(i)}
                 onFocus={() => setHoverIdx(i)}
                 onBlur={() => setHoverIdx(null)}
                 aria-label={`${b.fullLabel}: ${signatureFormatter.format(b.value)} signatures`}
-                className={cn(
-                  "flex-1 cursor-pointer transition-all hover:bg-primary",
-                  isHovered
-                    ? "bg-primary"
-                    : isPeak
-                      ? "bg-primary/65"
-                      : "bg-primary/25",
-                )}
+                className="flex-1 cursor-pointer transition-[opacity,height] duration-200"
                 style={{
-                  height: `${Math.max(3, (b.value / max) * 100)}%`,
+                  height: `${Math.max(6, (b.value / max) * 100)}%`,
+                  backgroundColor: "var(--color-primary)",
+                  opacity,
                 }}
               />
             );
           })}
         </div>
         <div className="flex justify-between text-[10px] tabular-nums text-muted-foreground/70 md:text-xs">
-          {axisLabels(range, now).map((l, i) => (
+          {axisLabels(range, now, opened).map((l, i) => (
             <span key={`${l}-${i}`}>{l}</span>
           ))}
         </div>

@@ -36,7 +36,7 @@ export function ActivityLifecycle({ attrs }: Props) {
   if (!opened) {
     return (
       <section className={cn(sectionShell, "gap-3")}>
-        <SectionHeading>Lifecycle</SectionHeading>
+        <SectionHeading>Lifetime</SectionHeading>
         <p className="text-sm text-muted-foreground">
           This petition has not opened yet.
         </p>
@@ -50,7 +50,7 @@ export function ActivityLifecycle({ attrs }: Props) {
   if (rightEdge <= opened) {
     return (
       <section className={cn(sectionShell, "gap-3")}>
-        <SectionHeading>Lifecycle</SectionHeading>
+        <SectionHeading>Lifetime</SectionHeading>
         <p className="text-sm text-muted-foreground">
           Lifecycle becomes available once a closing date is set.
         </p>
@@ -89,27 +89,13 @@ export function ActivityLifecycle({ attrs }: Props) {
 
   return (
     <section className={cn(sectionShell, "gap-5")}>
-      <SectionHeading>Lifecycle</SectionHeading>
+      <SectionHeading>Lifetime</SectionHeading>
 
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-baseline gap-2">
-          <span className="font-mono text-4xl font-bold leading-none tracking-tight tabular-nums md:text-5xl lg:text-6xl">
-            {closed
-              ? "Closed"
-              : `Day ${elapsedDays.toLocaleString("en-GB")}`}
-          </span>
-          {!closed && (
-            <span className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base">
-              of {totalDays.toLocaleString("en-GB")}
-            </span>
-          )}
-        </div>
-        <p className="text-sm text-muted-foreground md:text-base">
-          {closed
-            ? `Ran for ${elapsedDays.toLocaleString("en-GB")} days`
-            : `${remainingDays.toLocaleString("en-GB")} ${remainingDays === 1 ? "day" : "days"} left to sign`}
-        </p>
-      </div>
+      <p className="text-sm leading-snug text-foreground md:text-base">
+        {closed
+          ? `Ran for ${elapsedDays.toLocaleString("en-GB")} days.`
+          : `Day ${elapsedDays.toLocaleString("en-GB")} of ${totalDays.toLocaleString("en-GB")}, ${remainingDays.toLocaleString("en-GB")} ${remainingDays === 1 ? "day" : "days"} left to sign.`}
+      </p>
 
       <div className="flex flex-col gap-3">
         <div className="relative h-1.5 w-full bg-primary/10">

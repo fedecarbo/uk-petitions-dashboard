@@ -2,12 +2,11 @@
 
 import type { PetitionAttributes } from "@/lib/petitions-api";
 import type { PetitionHistorySample } from "@/hooks/use-petition";
-import { ActivityLifecycle } from "@/components/dashboards/stats/activity-lifecycle";
 import { ActivityPace } from "@/components/dashboards/stats/activity-pace";
 import { ActivityTrends } from "@/components/dashboards/stats/activity-trends";
 import { ActivityGeography } from "@/components/dashboards/stats/activity-geography";
+import { ActivityLifecycle } from "@/components/dashboards/stats/activity-lifecycle";
 import { ActivityContext } from "@/components/dashboards/stats/activity-context";
-import { ActivityPulse } from "@/components/dashboards/stats/activity-pulse";
 
 interface ActivityProps {
   attrs: PetitionAttributes;
@@ -21,12 +20,11 @@ export function Activity({ attrs, history }: ActivityProps) {
         Activity
       </h2>
 
-      <ActivityLifecycle attrs={attrs} />
       <ActivityPace attrs={attrs} history={history} />
       <ActivityTrends attrs={attrs} />
       <ActivityGeography attrs={attrs} />
+      <ActivityLifecycle attrs={attrs} />
       <ActivityContext attrs={attrs} />
-      <ActivityPulse attrs={attrs} history={history} />
 
       {/* Spacer so the last section clears the scroll edge — overflow-auto
           containers tend to clip bottom padding in WebKit. */}

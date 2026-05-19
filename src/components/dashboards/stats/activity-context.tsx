@@ -32,7 +32,7 @@ export function ActivityContext({ attrs }: Props) {
 
   return (
     <section className={cn(sectionShell, "gap-4")}>
-      <SectionHeading>Context</SectionHeading>
+      <SectionHeading>About</SectionHeading>
 
       <dl className="flex flex-col gap-3 text-xs md:text-sm">
         {departments.length > 0 && (

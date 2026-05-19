@@ -44,7 +44,7 @@ export function ActivityGeography({ attrs }: Props) {
 
   return (
     <section className={cn(sectionShell, "gap-4")}>
-      <SectionHeading>Geography</SectionHeading>
+      <SectionHeading>Regions</SectionHeading>
 
       <ol className="flex flex-col gap-2">
         {regions.map((r, i) => {
