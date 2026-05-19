@@ -3,7 +3,7 @@
 import type { PetitionAttributes } from "@/lib/petitions-api";
 import type { PetitionHistorySample } from "@/hooks/use-petition";
 import { ActivityPace } from "@/components/dashboards/stats/activity-pace";
-import { ActivityTrends } from "@/components/dashboards/stats/activity-trends";
+import { ActivitySignaturesOverTime } from "@/components/dashboards/stats/activity-signatures";
 import { ActivityGeography } from "@/components/dashboards/stats/activity-geography";
 import { ActivityLifecycle } from "@/components/dashboards/stats/activity-lifecycle";
 import { ActivityContext } from "@/components/dashboards/stats/activity-context";
@@ -21,7 +21,7 @@ export function Activity({ attrs, history }: ActivityProps) {
       </h2>
 
       <ActivityPace attrs={attrs} history={history} />
-      <ActivityTrends attrs={attrs} />
+      <ActivitySignaturesOverTime />
       <ActivityGeography attrs={attrs} />
       <ActivityLifecycle attrs={attrs} />
       <ActivityContext attrs={attrs} />
