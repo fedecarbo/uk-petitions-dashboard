@@ -25,7 +25,7 @@ export function PetitionStatus({ state }: PetitionStatusProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center self-start rounded-sm px-2.5 py-1 text-xs font-medium lg:px-3 lg:py-1.5 lg:text-base xl:px-4 xl:py-2 xl:text-lg",
+        "inline-flex items-center self-start rounded-sm px-2.5 py-1 text-base font-medium lg:px-3 lg:py-1.5 xl:px-4 xl:py-2",
         isLive
           ? "bg-status-live-bg text-status-live-fg"
           : "bg-status-neutral-bg text-status-neutral-fg",

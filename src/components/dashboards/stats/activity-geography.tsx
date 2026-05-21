@@ -54,7 +54,7 @@ export function ActivityGeography({ attrs }: Props) {
           const isLead = i === 0;
           return (
             <li key={r.ons_code} className="flex flex-col gap-1.5">
-              <div className="flex items-baseline justify-between gap-3 text-xs md:text-sm">
+              <div className="flex items-baseline justify-between gap-3 text-base">
                 <span
                   className={cn(
                     "flex items-baseline gap-2",
@@ -63,7 +63,7 @@ export function ActivityGeography({ attrs }: Props) {
                 >
                   <span
                     aria-hidden
-                    className="w-3 font-mono text-[10px] tabular-nums text-muted-foreground/60 md:text-xs"
+                    className="w-3 font-mono text-sm tabular-nums text-muted-foreground/60"
                   >
                     {i + 1}
                   </span>
@@ -73,7 +73,7 @@ export function ActivityGeography({ attrs }: Props) {
                   <span className="text-muted-foreground">
                     {signatureFormatter.format(r.signature_count)}
                   </span>
-                  <span className="text-[10px] text-muted-foreground/70 md:text-xs">
+                  <span className="text-sm text-muted-foreground/70">
                     {share.toFixed(1)}%
                   </span>
                 </div>
@@ -93,7 +93,7 @@ export function ActivityGeography({ attrs }: Props) {
       </ol>
 
       {nonUkTotal > 0 && (
-        <p className="text-xs leading-snug text-muted-foreground md:text-sm">
+        <p className="text-base leading-snug text-muted-foreground">
           Plus{" "}
           <span className="font-mono font-semibold tabular-nums text-foreground">
             {signatureFormatter.format(nonUkTotal)}

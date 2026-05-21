@@ -34,7 +34,7 @@ export function LiveIndicator({
       : "Loading…";
 
   return (
-    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground md:text-sm">
+    <div className="flex items-center gap-2 text-base font-medium text-muted-foreground">
       <span className="relative flex h-2 w-2 md:h-2.5 md:w-2.5">
         <span
           className={cn(

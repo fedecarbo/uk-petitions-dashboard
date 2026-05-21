@@ -16,7 +16,7 @@ export default function HomePage() {
 
       <div className="flex flex-1 flex-col justify-center py-12 md:py-16 lg:py-20">
         <div className="flex w-full max-w-5xl flex-col gap-10 md:gap-14 lg:gap-16 xl:max-w-6xl 2xl:max-w-7xl">
-          <h1 className="text-balance text-4xl font-bold leading-[1.05] tracking-tight md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl">
+          <h1 className="text-balance text-4xl font-bold leading-[1.05] tracking-tight lg:text-7xl">
             Watch any UK petition, live.
           </h1>
 
@@ -27,7 +27,7 @@ export default function HomePage() {
             >
               <PetitionSearch />
             </label>
-            <p className="text-base text-muted-foreground md:text-lg">
+            <p className="text-base text-muted-foreground">
               Try{" "}
               <Link
                 href={`/p/${EXAMPLE_ID}`}
@@ -40,7 +40,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <footer className="flex shrink-0 items-center justify-center text-sm text-muted-foreground md:text-base">
+      <footer className="flex shrink-0 items-center justify-center text-base text-muted-foreground">
         Built by{" "}
         <a
           href="https://unboxed.co"

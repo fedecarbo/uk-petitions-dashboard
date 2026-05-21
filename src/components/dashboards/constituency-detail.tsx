@@ -51,14 +51,14 @@ export function ConstituencyDetail({
       <button
         type="button"
         onClick={onBack}
-        className="-ml-1.5 inline-flex w-fit items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
+        className="-ml-1.5 inline-flex w-fit items-center gap-1.5 rounded-md px-1.5 py-1 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <ArrowLeft aria-hidden size={14} />
         Back
       </button>
 
       <div className="flex flex-col gap-1">
-        <h3 className="text-lg leading-tight font-semibold tracking-tight text-balance md:text-xl lg:text-xl xl:text-2xl">
+        <h3 className="text-2xl leading-tight font-semibold tracking-tight text-balance">
           {name}
         </h3>
         <MPHeader mp={mp} fallback={mpFromPetition} />
@@ -67,17 +67,17 @@ export function ConstituencyDetail({
       <div className="flex items-baseline gap-2">
         <span
           aria-label={`${signatureFormatter.format(signatureCount)} signatures`}
-          className="font-mono text-3xl font-bold tabular-nums md:text-4xl lg:text-4xl xl:text-5xl"
+          className="font-mono text-4xl font-bold tabular-nums"
         >
           {signatureFormatter.format(signatureCount)}
         </span>
-        <span className="text-xs font-medium text-muted-foreground md:text-sm">
+        <span className="text-base font-medium text-muted-foreground">
           Signatures
         </span>
       </div>
 
       {hasSigs ? (
-        <dl className="flex flex-col gap-1.5 text-sm md:text-base">
+        <dl className="flex flex-col gap-1.5 text-base">
           {rank !== null && (
             <Fact
               label="Rank"
@@ -90,7 +90,7 @@ export function ConstituencyDetail({
           {binLabel && <Fact label="Bin" value={binLabel} />}
         </dl>
       ) : (
-        <p className="text-sm text-muted-foreground md:text-base">
+        <p className="text-base text-muted-foreground">
           No signatures yet from this constituency.
         </p>
       )}
@@ -100,7 +100,7 @@ export function ConstituencyDetail({
       <button
         type="button"
         onClick={onZoomHere}
-        className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-base"
+        className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-base font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <Locate aria-hidden size={14} />
         Zoom here
@@ -127,7 +127,7 @@ function MPHeader({
 }) {
   if (mp.status === "ready") {
     return (
-      <p className="text-sm text-muted-foreground md:text-base">
+      <p className="text-base text-muted-foreground">
         {mp.data.name}
         {mp.data.party && (
           <>
@@ -150,7 +150,7 @@ function MPHeader({
   }
   // idle or error: fall back to the name from the petitions payload
   return fallback ? (
-    <p className="text-sm text-muted-foreground md:text-base">{fallback}</p>
+    <p className="text-base text-muted-foreground">{fallback}</p>
   ) : null;
 }
 
@@ -169,7 +169,7 @@ function MPContactBlock({ mp }: { mp: ReturnType<typeof useMP> }) {
   const hasContact = email || phone || website || twitter;
 
   return (
-    <div className="flex flex-col gap-1.5 border-t border-border/40 pt-3 text-sm md:text-base">
+    <div className="flex flex-col gap-1.5 border-t border-border/40 pt-3 text-base">
       <ContactLink
         href={parliamentUrl}
         external
@@ -212,7 +212,7 @@ function MPContactBlock({ mp }: { mp: ReturnType<typeof useMP> }) {
         </ContactLink>
       )}
       {!hasContact && (
-        <p className="text-xs text-muted-foreground md:text-sm">
+        <p className="text-base text-muted-foreground">
           No public contact details published.
         </p>
       )}

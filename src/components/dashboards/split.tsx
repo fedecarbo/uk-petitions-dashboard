@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { LiveIndicator } from "@/components/live-indicator";
@@ -48,7 +48,7 @@ function PetitionByline({ attrs }: { attrs: PetitionAttributes }) {
   if (facts.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground md:text-sm lg:gap-x-4 lg:text-base xl:text-lg">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-muted-foreground lg:gap-x-4">
       {facts.map((fact, i) => (
         <span key={fact} className="flex items-center gap-x-3 lg:gap-x-4">
           {i > 0 && (
@@ -79,7 +79,7 @@ function JourneyBar({ attrs }: { attrs: PetitionAttributes }) {
   return (
     <div className="flex flex-col gap-2 pt-2 md:gap-2.5 md:pt-3 lg:gap-3 lg:pt-4">
       {sentence && (
-        <p className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base xl:text-lg 2xl:text-xl">
+        <p className="text-base font-medium text-muted-foreground">
           {sentence}
         </p>
       )}
@@ -154,7 +154,7 @@ function JourneyLabel({
     <span
       style={{ left: `${position * 100}%` }}
       className={cn(
-        "absolute top-0 text-[10px] font-medium tabular-nums md:text-xs lg:text-sm xl:text-base 2xl:text-lg",
+        "absolute top-0 text-base font-medium tabular-nums",
         align === "right" ? "-translate-x-full" : "-translate-x-1/2",
         reached
           ? "text-foreground font-semibold"
@@ -166,59 +166,117 @@ function JourneyLabel({
   );
 }
 
-function AdditionalDetails({ text }: { text: string }) {
-  const [expanded, setExpanded] = useState(false);
+function PetitionDescription({
+  background,
+  additionalDetails,
+  expanded,
+  onToggle,
+}: {
+  background: string | null;
+  additionalDetails: string | null;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const [overflowing, setOverflowing] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Background and additional details read as one description; blank line between.
+  const text = [background, additionalDetails]
+    .map((t) => t?.trim())
+    .filter(Boolean)
+    .join("\n\n");
+
+  // While collapsed the text box flex-shrinks to fill the leftover panel height
+  // and clips; offer "Show more" only when it's actually cut off at that edge.
+  // (When expanded the whole panel scrolls instead — see StatsBody.)
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setOverflowing(el.scrollHeight - el.clientHeight > 1);
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [text]);
+
+  if (!text) return null;
+
+  const showToggle = expanded || overflowing;
 
   return (
-    <div className="flex max-w-3xl flex-col gap-2">
-      {expanded && (
-        <p className="whitespace-pre-line text-sm leading-snug text-muted-foreground md:text-base lg:text-base xl:text-lg 2xl:text-xl">
+    <div
+      className={cn(
+        "flex max-w-3xl flex-col gap-2",
+        expanded ? "shrink-0" : "min-h-0",
+      )}
+    >
+      <div
+        ref={ref}
+        className={cn("relative", !expanded && "min-h-0 overflow-hidden")}
+      >
+        <p className="whitespace-pre-line text-lg leading-snug text-muted-foreground">
           {text}
         </p>
+        {!expanded && overflowing && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-12"
+            style={{
+              background: "linear-gradient(to top, var(--background), transparent)",
+            }}
+          />
+        )}
+      </div>
+      {showToggle && (
+        <button
+          type="button"
+          onClick={onToggle}
+          className="shrink-0 self-start text-base font-medium text-primary underline underline-offset-4 hover:no-underline"
+          aria-expanded={expanded}
+        >
+          {expanded ? "Show less" : "Show more"}
+        </button>
       )}
-      <button
-        type="button"
-        onClick={() => setExpanded((v) => !v)}
-        className="self-start text-xs font-medium text-primary underline underline-offset-4 hover:no-underline md:text-sm lg:text-base"
-        aria-expanded={expanded}
-      >
-        {expanded ? "Show less" : "Show more"}
-      </button>
     </div>
   );
 }
 
 function StatsBody({ attrs }: { attrs: PetitionAttributes }) {
+  const [descExpanded, setDescExpanded] = useState(false);
+
   return (
     <div className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
-      <section className="flex min-w-0 flex-col border-b border-border lg:grid lg:grid-rows-[2fr_1fr] lg:border-b-0 lg:border-r lg:min-h-0 lg:overflow-hidden">
-        <div className="no-scrollbar flex flex-col gap-3 border-b border-border p-6 md:gap-4 md:p-8 lg:min-h-0 lg:overflow-y-auto lg:p-8">
-          <PetitionStatus state={attrs.state} />
-          <h1 className="text-2xl font-semibold leading-[1.1] tracking-tight text-balance md:text-3xl lg:text-3xl xl:text-4xl 2xl:text-6xl">
-            {attrs.action}
-          </h1>
-          <PetitionByline attrs={attrs} />
-
-          {attrs.background && (
-            <p className="max-w-3xl whitespace-pre-line text-base leading-snug text-muted-foreground md:text-lg lg:text-lg xl:text-xl 2xl:text-2xl">
-              {attrs.background}
-            </p>
+      <section className="flex min-w-0 flex-col border-b border-border lg:grid lg:grid-rows-[minmax(0,2fr)_minmax(0,1fr)] lg:border-b-0 lg:border-r lg:min-h-0 lg:overflow-hidden">
+        <div
+          className={cn(
+            "flex flex-col gap-3 border-b border-border p-6 md:gap-4 md:p-8 lg:min-h-0 lg:p-8",
+            descExpanded ? "no-scrollbar lg:overflow-y-auto" : "lg:overflow-hidden",
           )}
+        >
+          <div className="flex flex-col gap-3 md:gap-4 lg:shrink-0">
+            <PetitionStatus state={attrs.state} />
+            <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-balance lg:text-6xl">
+              {attrs.action}
+            </h1>
+            <PetitionByline attrs={attrs} />
+          </div>
 
-          {attrs.additional_details && (
-            <AdditionalDetails text={attrs.additional_details} />
-          )}
+          <PetitionDescription
+            background={attrs.background}
+            additionalDetails={attrs.additional_details}
+            expanded={descExpanded}
+            onToggle={() => setDescExpanded((v) => !v)}
+          />
         </div>
 
         <div className="flex flex-col justify-center gap-2 p-6 md:gap-3 md:p-8 lg:min-h-0 lg:p-8">
           <div className="flex items-baseline gap-3 md:gap-4 lg:gap-5 2xl:gap-6">
             <span
               aria-label={`${signatureFormatter.format(attrs.signature_count)} signatures`}
-              className="font-mono text-6xl font-bold leading-none tracking-tight tabular-nums sm:text-7xl lg:text-7xl xl:text-8xl 2xl:text-8xl"
+              className="font-mono text-4xl font-bold leading-none tracking-tight tabular-nums lg:text-6xl"
             >
               {signatureFormatter.format(attrs.signature_count)}
             </span>
-            <span className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base xl:text-lg 2xl:text-xl">
+            <span className="text-base font-medium text-muted-foreground">
               Signatures
             </span>
           </div>
@@ -264,7 +322,7 @@ export function DashboardSplit({ id, view }: DashboardSplitProps) {
       <header className="flex shrink-0 items-center justify-between gap-6">
         <Link
           href="/"
-          className="text-xs font-medium text-muted-foreground hover:text-foreground md:text-sm"
+          className="text-base font-medium text-muted-foreground hover:text-foreground"
         >
           ← New search
         </Link>
@@ -273,7 +331,7 @@ export function DashboardSplit({ id, view }: DashboardSplitProps) {
             href="https://unboxed.co"
             target="_blank"
             rel="noreferrer noopener"
-            className="hidden text-xs text-muted-foreground hover:text-foreground md:inline md:text-sm"
+            className="hidden text-base text-muted-foreground hover:text-foreground md:inline"
           >
             Built by{" "}
             <span className="font-medium text-foreground">Unboxed</span>

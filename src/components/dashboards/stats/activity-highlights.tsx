@@ -37,7 +37,7 @@ export function ActivityHighlights({ attrs, onFocusDay, onFocusMonth }: Props) {
 
   return (
     <section className="flex flex-col gap-4">
-      <ul className="flex flex-col divide-y divide-border text-base leading-relaxed text-muted-foreground md:text-lg">
+      <ul className="flex flex-col divide-y divide-border text-lg leading-relaxed text-muted-foreground">
         {topRegion ? (
           <li className="py-2.5 first:pt-0 last:pb-0">
             The region with the most signatures is{" "}
@@ -69,7 +69,7 @@ export function ActivityHighlights({ attrs, onFocusDay, onFocusMonth }: Props) {
       </ul>
 
       {day || month ? (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-base text-muted-foreground">
           <SampleBadge />
           <span>Day and month figures are from a sample timeline.</span>
         </div>

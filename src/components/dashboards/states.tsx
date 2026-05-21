@@ -7,7 +7,7 @@ interface DashboardLoadingProps {
 export function DashboardLoading({ id }: DashboardLoadingProps) {
   return (
     <main className="grid min-h-dvh place-items-center px-6">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-base text-muted-foreground">
         Loading petition #{id}…
       </p>
     </main>
@@ -23,13 +23,13 @@ export function DashboardError({ id, message }: DashboardErrorProps) {
   return (
     <main className="grid min-h-dvh place-items-center px-6">
       <div className="flex max-w-md flex-col items-center gap-4 text-center">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-base text-muted-foreground">
           Couldn’t load petition #{id}
         </p>
         <p className="text-base">{message}</p>
         <Link
           href="/"
-          className="text-sm font-medium text-primary underline underline-offset-4"
+          className="text-base font-medium text-primary underline underline-offset-4"
         >
           ← Back to search
         </Link>

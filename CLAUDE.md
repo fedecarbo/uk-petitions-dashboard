@@ -64,6 +64,20 @@ This is how `create-next-app` and the initial `shadcn init` were run during scaf
 - **Mobile is the secondary target.** TV/desktop is primary. Don't optimise for mobile at the cost of TV/desktop unless asked.
 - **Brand palette lives in [src/app/globals.css](src/app/globals.css).** Don't introduce hex codes in components — add a token if a colour doesn't exist yet. See the brand-palette and mint-is-focus-only memories for the rules.
 
+## Typography — allowed text sizes
+
+To stay close to the GOV.UK (GDS) type scale, authored components use **only** these Tailwind text-size classes (each is the nearest stock class to a GDS step):
+
+`text-base` (16, body floor) · `text-lg` (≈19) · `text-2xl` (24) · `text-3xl` (≈27) · `text-4xl` (36) · `text-5xl` (48) · `text-6xl` (60) · `text-7xl` (≈80, display).
+
+**All text is a single fixed size — do not add responsive size variants.** GDS uses a two-screen model, and only a few big titles scale. The **only** elements that carry a text-size breakpoint (a single small→large step at `lg`) are: the landing headline ([page.tsx](src/app/page.tsx)), the search input ([petition-search.tsx](src/components/petition-search.tsx)), and the stats-view petition title + hero count ([split.tsx](src/components/dashboards/split.tsx)). Everything else — including section headings, panel titles, the map/detail counts, body, labels, badges, captions — is one fixed size.
+
+Two exceptions only:
+- `text-sm` (14) — chart axis/tick labels that genuinely must be small. Not for badges, captions, or other chrome (those use the 16px floor).
+- `text-7xl` is the hero count's large size; `text-6xl` is currently unused but allowed.
+
+**Never** use `text-xs`, `text-xl`, `text-8xl`, `text-9xl`, or arbitrary `text-[Npx]`. The 18→24 gap in the subset is intentional and mirrors GDS's own 19→24 jump. This rule covers code we author — `src/components/ui/*` shadcn primitives keep their own size variants.
+
 ## What's deferred (do not build without asking)
 
 - **Welcome-view trending petitions list** — kept off intentionally to preserve minimalism.

@@ -60,7 +60,7 @@ function ResponseBody({ summary, details, onInteract }: ResponseBodyProps) {
             setExpanded((v) => !v);
             onInteract?.();
           }}
-          className="self-start text-xs font-medium text-primary underline underline-offset-4 hover:no-underline md:text-sm lg:text-base"
+          className="self-start text-base font-medium text-primary underline underline-offset-4 hover:no-underline"
         >
           {expanded ? "Show less" : "Read full response"}
         </button>
@@ -81,7 +81,7 @@ function DebateLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-baseline gap-1 text-xs font-medium text-primary underline underline-offset-4 hover:no-underline md:text-sm lg:text-base"
+      className="inline-flex items-baseline gap-1 text-base font-medium text-primary underline underline-offset-4 hover:no-underline"
     >
       {children}
       <span aria-hidden>↗</span>
@@ -251,10 +251,10 @@ export function PetitionProgress({ attrs, onInteract }: PetitionProgressProps) {
   return (
     <div className="flex h-full flex-col gap-5 lg:gap-6">
       <div className="flex flex-col gap-1.5">
-        <h2 className="text-lg font-semibold md:text-xl lg:text-2xl xl:text-3xl">
+        <h2 className="text-2xl font-semibold">
           Petition progress
         </h2>
-        <p className="text-xs leading-snug text-muted-foreground/80 md:text-sm lg:text-base xl:text-lg">
+        <p className="text-base leading-snug text-muted-foreground/80">
           View all updates for this petition, with the most recent first.
         </p>
       </div>
@@ -291,14 +291,14 @@ export function PetitionProgress({ attrs, onInteract }: PetitionProgressProps) {
                 </div>
 
                 <div className="flex flex-1 flex-col gap-2 pb-1">
-                  <span className="text-sm font-semibold leading-tight md:text-base lg:text-lg xl:text-xl">
+                  <span className="text-lg font-semibold leading-tight">
                     {entry.date}
                   </span>
                   <div className="flex flex-col gap-2 rounded-md border border-border/60 bg-card p-4 lg:p-5">
-                    <h3 className="text-sm font-semibold leading-snug md:text-base lg:text-lg">
+                    <h3 className="text-lg font-semibold leading-snug">
                       {entry.title}
                     </h3>
-                    <div className="flex flex-col gap-2 text-xs leading-snug text-muted-foreground md:text-sm lg:text-base">
+                    <div className="flex flex-col gap-2 text-base leading-snug text-muted-foreground">
                       {entry.body}
                     </div>
                   </div>

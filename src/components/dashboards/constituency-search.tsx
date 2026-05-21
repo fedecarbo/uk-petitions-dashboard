@@ -103,7 +103,7 @@ export function ConstituencySearch({
 
   return (
     <div ref={containerRef} className="relative">
-      <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm focus-within:border-ring focus-within:ring-2 focus-within:ring-ring lg:py-2.5 lg:text-base">
+      <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-base focus-within:border-ring focus-within:ring-2 focus-within:ring-ring lg:py-2.5">
         <Search
           aria-hidden
           size={16}
@@ -148,7 +148,7 @@ export function ConstituencySearch({
       </div>
 
       {open && query && matches.length === 0 && (
-        <p className="absolute top-full right-0 left-0 z-10 mt-1 rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground shadow-md lg:text-sm">
+        <p className="absolute top-full right-0 left-0 z-10 mt-1 rounded-md border border-border bg-card px-3 py-2 text-base text-muted-foreground shadow-md">
           No constituency matches “{query}”.
         </p>
       )}
@@ -171,7 +171,7 @@ export function ConstituencySearch({
                 commit(m);
               }}
               className={cn(
-                "cursor-pointer px-3 py-1.5 text-sm",
+                "cursor-pointer px-3 py-1.5 text-base",
                 i === activeIndex
                   ? "bg-muted text-foreground"
                   : "text-foreground hover:bg-muted/60",
@@ -179,7 +179,7 @@ export function ConstituencySearch({
             >
               <div className="truncate font-medium">{m.name}</div>
               {m.mp && (
-                <div className="truncate text-xs text-muted-foreground">
+                <div className="truncate text-base text-muted-foreground">
                   {m.mp}
                 </div>
               )}

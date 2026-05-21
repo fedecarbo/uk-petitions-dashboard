@@ -105,17 +105,17 @@ export function MapMode({ attrs }: MapModeProps) {
           className="flex flex-col gap-3 border-b border-border p-6 md:gap-4 md:p-8 lg:shrink-0 lg:gap-4 lg:p-8"
         >
           <PetitionStatus state={attrs.state} />
-          <h1 className="text-lg leading-tight font-semibold tracking-tight text-balance md:text-xl lg:text-xl xl:text-2xl 2xl:text-3xl">
+          <h1 className="text-2xl leading-tight font-semibold tracking-tight text-balance">
             {attrs.action}
           </h1>
           <div className="flex items-baseline gap-2 lg:gap-3">
             <span
               aria-label={`${signatureFormatter.format(attrs.signature_count)} signatures`}
-              className="font-mono text-3xl font-bold tracking-tight tabular-nums md:text-4xl lg:text-4xl xl:text-5xl 2xl:text-6xl leading-none"
+              className="font-mono text-5xl font-bold tracking-tight tabular-nums leading-none"
             >
               {signatureFormatter.format(attrs.signature_count)}
             </span>
-            <span className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base">
+            <span className="text-base font-medium text-muted-foreground">
               Signatures
             </span>
           </div>
@@ -195,11 +195,11 @@ function DefaultView({
       )}
 
       <div className="flex flex-1 flex-col gap-2 lg:gap-3">
-        <h2 className="text-xs font-medium text-muted-foreground md:text-sm lg:text-base">
+        <h2 className="text-base font-medium text-muted-foreground">
           Top constituencies
         </h2>
         {topAreas.length === 0 ? (
-          <p className="text-sm text-muted-foreground md:text-base">
+          <p className="text-base text-muted-foreground">
             No constituency data yet.
           </p>
         ) : (

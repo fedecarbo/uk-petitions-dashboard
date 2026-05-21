@@ -316,7 +316,7 @@ export function UKConstituencyMap({
 
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">
+      <div className="flex h-full items-center justify-center p-6 text-base text-muted-foreground">
         Couldn’t load the map: {error}
       </div>
     );
@@ -324,7 +324,7 @@ export function UKConstituencyMap({
 
   if (!paths) {
     return (
-      <div className="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">
+      <div className="flex h-full items-center justify-center p-6 text-base text-muted-foreground">
         Loading constituencies…
       </div>
     );
@@ -378,7 +378,7 @@ export function UKConstituencyMap({
       />
 
       {activeInfo && (
-        <div className="pointer-events-none absolute right-4 top-4 max-w-[16rem] rounded-md border border-border bg-card/95 px-3 py-2 text-sm shadow-sm backdrop-blur">
+        <div className="pointer-events-none absolute right-4 top-4 max-w-[16rem] rounded-md border border-border bg-card/95 px-3 py-2 text-base shadow-sm backdrop-blur">
           <div className="font-medium leading-tight">{activeInfo.name}</div>
           <div className="font-mono tabular-nums text-muted-foreground">
             {signatureFormatter.format(activeInfo.count)} signatures
@@ -518,7 +518,7 @@ function ZoomButton({
 
 function Legend({ labels }: { labels: BinLabel[] }) {
   return (
-    <div className="pointer-events-none absolute bottom-3 left-3 flex flex-col gap-1.5 rounded-md border border-border bg-card/95 px-2.5 py-2 text-xs text-muted-foreground backdrop-blur lg:text-sm">
+    <div className="pointer-events-none absolute bottom-3 left-3 flex flex-col gap-1.5 rounded-md border border-border bg-card/95 px-2.5 py-2 text-base text-muted-foreground backdrop-blur">
       <p className="font-medium text-foreground">Signatures</p>
       <ul className="flex flex-col gap-1">
         {labels.map((entry) => (

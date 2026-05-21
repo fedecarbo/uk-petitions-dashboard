@@ -34,12 +34,12 @@ export function PetitionSearch() {
           aria-label="Petition ID or URL"
           autoFocus
           inputMode="text"
-          className="h-auto w-full rounded-none border-0 bg-transparent px-0 py-3 text-2xl font-semibold shadow-none placeholder:text-muted-foreground/40 focus-visible:ring-0 md:py-4 md:text-3xl lg:py-6 lg:text-4xl xl:text-5xl dark:bg-transparent"
+          className="h-auto w-full rounded-none border-0 bg-transparent px-0 py-3 text-3xl font-semibold shadow-none placeholder:text-muted-foreground/40 focus-visible:ring-0 md:py-4 lg:py-6 lg:text-5xl dark:bg-transparent"
         />
       </form>
       {error && (
         <p
-          className="text-sm text-destructive md:text-base"
+          className="text-base text-destructive"
           aria-live="polite"
         >
           {error}

@@ -58,7 +58,7 @@ export function StatCarousel({ attrs, className }: StatCarouselProps) {
                 id={`stat-tab-${card.id}`}
                 onClick={() => setActiveIndex(idx)}
                 className={cn(
-                  "relative flex-1 px-3 py-3 text-xs font-medium transition-colors md:text-sm lg:py-4 lg:text-base",
+                  "relative flex-1 px-3 py-3 text-base font-medium transition-colors lg:py-4",
                   idx > 0 && "border-l border-border",
                   isActive
                     ? "bg-card text-foreground"

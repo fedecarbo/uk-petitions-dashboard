@@ -32,7 +32,7 @@ export function Activity({ attrs }: ActivityProps) {
 
   return (
     <div className="flex h-full flex-col">
-      <h2 className="mb-7 text-lg font-semibold md:text-xl lg:text-2xl xl:text-3xl">
+      <h2 className="mb-7 text-2xl font-semibold">
         Activity
       </h2>
 

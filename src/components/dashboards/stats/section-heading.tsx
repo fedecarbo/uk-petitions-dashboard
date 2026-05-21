@@ -12,7 +12,7 @@ export const sectionShell = cn(
 
 export function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-xs font-semibold tracking-wide text-muted-foreground md:text-sm">
+    <h3 className="text-base font-semibold tracking-wide text-muted-foreground">
       {children}
     </h3>
   );
@@ -21,7 +21,7 @@ export function SectionHeading({ children }: { children: React.ReactNode }) {
 export function SampleBadge() {
   return (
     <span
-      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border/70 px-1.5 py-0 text-[10px] leading-4 font-medium text-muted-foreground"
+      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border/70 px-1.5 py-0 text-base font-medium text-muted-foreground"
       title="Real captured timeline for petition 751472, used as a single example regardless of which petition is loaded."
     >
       <span aria-hidden className="size-1 rounded-full bg-muted-foreground/60" />

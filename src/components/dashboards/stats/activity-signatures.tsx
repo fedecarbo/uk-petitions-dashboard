@@ -395,7 +395,7 @@ export function ActivitySignaturesOverTime({
           onStepBack={stepBack}
           onStepForward={stepForward}
         />
-        <p className="text-sm text-muted-foreground md:text-base">
+        <p className="text-base text-muted-foreground">
           <span className="font-mono font-semibold tabular-nums text-foreground">
             {signatureFormatter.format(total)}
           </span>{" "}
@@ -459,14 +459,14 @@ export function ActivitySignaturesOverTime({
             );
           })}
         </div>
-        <div className="flex justify-between text-[10px] tabular-nums text-muted-foreground/70 md:text-xs">
+        <div className="flex justify-between text-sm tabular-nums text-muted-foreground/70">
           {axisLabels(range, anchor).map((l, i) => (
             <span key={`${l}-${i}`}>{l}</span>
           ))}
         </div>
       </div>
 
-      <p className="text-[11px] leading-snug text-muted-foreground/70 md:text-xs">
+      <p className="text-sm leading-snug text-muted-foreground/70">
         {hovered
           ? `${hovered.fullLabel} — ${signatureFormatter.format(hovered.value)} signatures`
           : peak.value > 0
@@ -567,7 +567,7 @@ function RangeToggle({
             aria-selected={active}
             onClick={() => onChange(r.id)}
             className={cn(
-              "rounded-[5px] px-2.5 py-1 text-xs font-medium transition-colors md:px-3 md:text-sm",
+              "rounded-[5px] px-2.5 py-1 text-base font-medium transition-colors md:px-3",
               active
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",

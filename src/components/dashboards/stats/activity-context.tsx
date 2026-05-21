@@ -40,7 +40,7 @@ export function ActivityContext({ attrs }: Props) {
     <section className={cn(sectionShell, "gap-4")}>
       <SectionHeading>About</SectionHeading>
 
-      <dl className="flex flex-col gap-3 text-xs md:text-sm">
+      <dl className="flex flex-col gap-3 text-base">
         {attrs.opened_at && (
           <Row label="Opened">
             <span className="text-foreground">
@@ -99,7 +99,7 @@ export function ActivityContext({ attrs }: Props) {
                 >
                   <span className="text-foreground">{r.subject}</span>
                   {r.occurred_on && (
-                    <span className="text-[11px] text-muted-foreground/80 md:text-xs">
+                    <span className="text-base text-muted-foreground/80">
                       {formatDateShort(r.occurred_on)}
                     </span>
                   )}
