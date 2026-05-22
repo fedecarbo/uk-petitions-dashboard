@@ -254,8 +254,8 @@ function StatsBody({ attrs }: { attrs: PetitionAttributes }) {
   const [descExpanded, setDescExpanded] = useState(false);
 
   return (
-    <div className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
-      <section className="flex min-w-0 flex-col border-b border-border lg:grid lg:grid-rows-[minmax(0,1fr)_auto] lg:border-b-0 lg:border-r lg:min-h-0 lg:overflow-hidden">
+    <div className="grid flex-1 gap-3 md:gap-4 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
+      <section className="flex min-w-0 flex-col overflow-hidden rounded-sm border border-border lg:grid lg:grid-rows-[minmax(0,1fr)_auto] lg:min-h-0">
         <div
           className={cn(
             "flex flex-col gap-6 border-b border-border p-6 md:gap-8 md:p-8 lg:min-h-0 lg:p-8",
@@ -296,7 +296,7 @@ function StatsBody({ attrs }: { attrs: PetitionAttributes }) {
 
       <aside
         aria-label="Petition statistics"
-        className="min-h-[320px] lg:min-h-0 lg:overflow-hidden"
+        className="min-h-[320px] overflow-hidden rounded-sm border border-border lg:min-h-0"
       >
         <StatCarousel attrs={attrs} className="h-full" />
       </aside>
@@ -355,7 +355,7 @@ export function DashboardSplit({ id, view }: DashboardSplitProps) {
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col overflow-hidden rounded-sm border border-border lg:min-h-0">
+      <div className="flex flex-1 flex-col overflow-hidden lg:min-h-0">
         {view === "map" ? (
           <MapMode attrs={attrs} />
         ) : (

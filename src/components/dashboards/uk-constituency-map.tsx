@@ -335,31 +335,33 @@ export function UKConstituencyMap({
 
   return (
     <div className="relative h-full w-full">
-      <svg
-        ref={svgRef}
-        viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
-        preserveAspectRatio="xMidYMid meet"
-        className="h-full w-full cursor-grab touch-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
-        role="img"
-        aria-label="Choropleth map of UK constituencies by signature count. Drag to pan, scroll to zoom, or use the controls below."
-        aria-keyshortcuts="Plus Minus 0 ArrowUp ArrowDown ArrowLeft ArrowRight"
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
-      >
-        <g ref={groupRef} className="stroke-border" strokeWidth={0.4}>
-          {paths.map((p) => (
-            <ChoroplethPath
-              key={p.code}
-              path={p}
-              lookup={lookup}
-              binScale={binScale}
-              activeCode={activeCode}
-              setActiveCode={onActiveChange}
-              onSelect={onSelect}
-            />
-          ))}
-        </g>
-      </svg>
+      <div className="absolute inset-3">
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+          preserveAspectRatio="xMidYMid meet"
+          className="h-full w-full cursor-grab touch-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
+          role="img"
+          aria-label="Choropleth map of UK constituencies by signature count. Drag to pan, scroll to zoom, or use the controls below."
+          aria-keyshortcuts="Plus Minus 0 ArrowUp ArrowDown ArrowLeft ArrowRight"
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+        >
+          <g ref={groupRef} className="stroke-border" strokeWidth={0.4}>
+            {paths.map((p) => (
+              <ChoroplethPath
+                key={p.code}
+                path={p}
+                lookup={lookup}
+                binScale={binScale}
+                activeCode={activeCode}
+                setActiveCode={onActiveChange}
+                onSelect={onSelect}
+              />
+            ))}
+          </g>
+        </svg>
+      </div>
 
       <span className="sr-only">
         Map keyboard controls: plus to zoom in, minus to zoom out, zero to
