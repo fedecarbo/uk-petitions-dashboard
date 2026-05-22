@@ -48,11 +48,11 @@ function PetitionByline({ attrs }: { attrs: PetitionAttributes }) {
   if (facts.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-muted-foreground lg:gap-x-4">
+    <div className="flex flex-col gap-y-1 text-base text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 lg:sm:gap-x-4">
       {facts.map((fact, i) => (
         <span key={fact} className="flex items-center gap-x-3 lg:gap-x-4">
           {i > 0 && (
-            <span aria-hidden className="text-muted-foreground/50">
+            <span aria-hidden className="hidden text-muted-foreground/50 sm:flex">
               ·
             </span>
           )}
