@@ -166,6 +166,11 @@ function JourneyLabel({
   );
 }
 
+const toggleClass =
+  "shrink-0 self-start text-base font-medium text-primary underline underline-offset-4 hover:no-underline";
+const paragraphClass =
+  "whitespace-pre-line text-lg leading-snug text-muted-foreground";
+
 function PetitionDescription({
   background,
   additionalDetails,
@@ -178,20 +183,20 @@ function PetitionDescription({
   onToggle: () => void;
 }) {
   const [clampLines, setClampLines] = useState(0);
-  const [overflowing, setOverflowing] = useState(false);
+  const [desktopOverflow, setDesktopOverflow] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
 
+  const bg = background?.trim() ?? "";
+  const extra = additionalDetails?.trim() ?? "";
   // Background and additional details read as one description; blank line between.
-  const text = [background, additionalDetails]
-    .map((t) => t?.trim())
-    .filter(Boolean)
-    .join("\n\n");
+  const combined = [bg, extra].filter(Boolean).join("\n\n");
 
   // At lg+ the panel is a fixed height: the collapsed text fills the leftover space
   // and is line-clamped to however many whole lines fit, so it ends with a clean "…"
   // on a line boundary instead of a half-cut line. "Show more" shows only when the
-  // text is actually clamped. Below lg the page scrolls, so we don't clamp.
+  // combined text is actually clamped. (Mobile uses a different, section-based split
+  // below, so this measurement is desktop-only.)
   useEffect(() => {
     if (expanded) return;
     const box = boxRef.current;
@@ -202,16 +207,16 @@ function PetitionDescription({
       if (!lineHeight) return;
       const available = box.clientHeight;
       setClampLines(Math.max(1, Math.floor(available / lineHeight)));
-      setOverflowing(p.scrollHeight - available > 1);
+      setDesktopOverflow(p.scrollHeight - available > 1);
     };
     const observer = new ResizeObserver(measure);
     observer.observe(box);
     return () => observer.disconnect();
-  }, [text, expanded]);
+  }, [combined, expanded]);
 
-  if (!text) return null;
+  if (!combined) return null;
 
-  const showToggle = expanded || overflowing;
+  const showDesktopToggle = expanded || desktopOverflow;
   const clamped = !expanded && clampLines > 0;
 
   return (
@@ -221,26 +226,48 @@ function PetitionDescription({
         expanded ? "lg:shrink-0" : "lg:min-h-0 lg:flex-1",
       )}
     >
+      {/* Mobile: the page scrolls freely, so a long description would push the hero
+          count far down. Show the full background and tuck the additional details
+          behind the toggle. */}
+      <div className="flex flex-col gap-2 lg:hidden">
+        <p className={paragraphClass}>{bg}</p>
+        {extra && expanded && <p className={paragraphClass}>{extra}</p>}
+        {extra && (
+          <button
+            type="button"
+            onClick={onToggle}
+            className={toggleClass}
+            aria-expanded={expanded}
+          >
+            {expanded ? "Show less" : "Show more"}
+          </button>
+        )}
+      </div>
+
+      {/* Desktop: combined text fit to the fixed-height panel. */}
       <div
         ref={boxRef}
-        className={cn(!expanded && "lg:min-h-0 lg:flex-1 lg:overflow-hidden")}
+        className={cn(
+          "hidden lg:block",
+          !expanded && "lg:min-h-0 lg:flex-1 lg:overflow-hidden",
+        )}
       >
         <p
           ref={textRef}
           className={cn(
-            "whitespace-pre-line text-lg leading-snug text-muted-foreground",
+            paragraphClass,
             clamped && "lg:line-clamp-[var(--clamp-lines)]",
           )}
           style={clamped ? ({ "--clamp-lines": clampLines } as CSSProperties) : undefined}
         >
-          {text}
+          {combined}
         </p>
       </div>
-      {showToggle && (
+      {showDesktopToggle && (
         <button
           type="button"
           onClick={onToggle}
-          className="shrink-0 self-start text-base font-medium text-primary underline underline-offset-4 hover:no-underline"
+          className={cn(toggleClass, "hidden lg:block")}
           aria-expanded={expanded}
         >
           {expanded ? "Show less" : "Show more"}
