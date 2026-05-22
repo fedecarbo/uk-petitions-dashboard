@@ -421,7 +421,7 @@ export function ActivitySignaturesOverTime({
                 <div
                   key={i}
                   aria-hidden
-                  className="pointer-events-none flex-1 rounded-[1px] bg-foreground/15"
+                  className="pointer-events-none flex-1 rounded-[1px] bg-primary/15"
                   style={{ height: "6%" }}
                 />
               );
@@ -455,7 +455,7 @@ export function ActivitySignaturesOverTime({
                 }
                 aria-label={`${b.fullLabel}: ${signatureFormatter.format(b.value)} signatures${drillLabel}`}
                 className={cn(
-                  "flex-1 rounded-[1px] bg-foreground transition-[opacity,height] duration-200",
+                  "flex-1 rounded-[1px] bg-primary transition-[opacity,height] duration-200",
                   canDrill ? "cursor-pointer" : "cursor-default",
                 )}
                 style={{
@@ -557,22 +557,28 @@ function RangeToggle({
   return (
     <ToggleGroup
       aria-label="Time range"
-      variant="outline"
-      spacing={0}
+      variant="default"
+      spacing={1}
       value={[value]}
       // Single-select: keep one range always selected — ignore the change if
       // clicking the active item would empty the group.
       onValueChange={(next) => {
         if (next[0]) onChange(next[0] as Range);
       }}
-      className="self-start"
+      // Bordered group with padding around gapped segments; the active one is a
+      // solid dark fill (monochrome — no blue, no shadow), keeping the blue
+      // accent for links, the map, and the data.
+      className="self-start rounded-md border p-0.5"
     >
       {RANGES.map((r) => (
         <ToggleGroupItem
           key={r.id}
           value={r.id}
-          // Keep the brand selection colour (green), not the default muted grey.
-          className="text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary aria-pressed:hover:text-primary-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+          className={cn(
+            "rounded-sm px-3 text-muted-foreground hover:bg-transparent hover:text-foreground",
+            "aria-pressed:bg-foreground aria-pressed:text-background aria-pressed:hover:bg-foreground aria-pressed:hover:text-background",
+            "data-[state=on]:bg-foreground data-[state=on]:text-background data-[state=on]:hover:bg-foreground data-[state=on]:hover:text-background",
+          )}
         >
           {r.label}
         </ToggleGroupItem>

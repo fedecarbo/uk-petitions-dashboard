@@ -61,20 +61,23 @@
 }
 
 :root {
+  /* Monochrome grey neutrals (chroma 0) + the blue primary as the single accent.
+     Mint is gone from light mode; the focus ring is blue here (Apple-style).
+     GOV.UK green is kept only for the semantic "live" status tag and dot. */
   --background: oklch(1 0 0);
-  --foreground: oklch(0.30 0.058 295);
+  --foreground: oklch(0.30 0 0);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.30 0.058 295);
+  --card-foreground: oklch(0.30 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.30 0.058 295);
+  --popover-foreground: oklch(0.30 0 0);
   --primary: oklch(0.553 0.163 261);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.898 0.029 295);
-  --secondary-foreground: oklch(0.392 0.184 296);
-  --muted: oklch(0.961 0.002 60);
+  --secondary: oklch(0.898 0 0);
+  --secondary-foreground: oklch(0.392 0 0);
+  --muted: oklch(0.961 0 0);
   --muted-foreground: oklch(0.443 0 0);
-  --accent: oklch(0.853 0.084 170);
-  --accent-foreground: oklch(0.30 0.058 295);
+  --accent: oklch(0.93 0.04 261);
+  --accent-foreground: oklch(0.30 0 0);
   --destructive: oklch(0.560 0.221 28);
   --live: oklch(0.696 0.17 162.5);
   /* GOV.UK status-tag colors — live (open / awaiting response / awaiting debate) and neutral (closed / rejected / debated / etc.) */
@@ -82,9 +85,9 @@
   --status-live-fg: #006548;
   --status-neutral-bg: #eeefef;
   --status-neutral-fg: #383f43;
-  --border: oklch(0.825 0.005 295);
-  --input: oklch(0.825 0.005 295);
-  --ring: oklch(0.853 0.084 170);
+  --border: oklch(0.825 0 0);
+  --input: oklch(0.825 0 0);
+  --ring: oklch(0.553 0.163 261);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
