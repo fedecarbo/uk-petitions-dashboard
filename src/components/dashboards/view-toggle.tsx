@@ -30,7 +30,7 @@ export function ViewToggle({ value, onChange }: ViewToggleProps) {
       onValueChange={(next) => {
         if (next[0]) onChange(next[0] as DashboardView);
       }}
-      className="shrink-0 rounded-md bg-secondary/50 p-0.5 dark:bg-background"
+      className="shrink-0 rounded-md border border-border bg-secondary/50 p-0.5 dark:bg-background"
     >
       {OPTIONS.map((option) => (
         <ToggleGroupItem
