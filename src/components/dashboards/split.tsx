@@ -264,7 +264,7 @@ function StatsBody({ attrs }: { attrs: PetitionAttributes }) {
         >
           <div className="flex flex-col gap-3 md:gap-4 lg:shrink-0">
             <PetitionStatus state={attrs.state} />
-            <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-balance lg:text-5xl wide:text-6xl">
+            <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-balance lg:text-5xl wide:text-6xl">
               {attrs.action}
             </h1>
             <PetitionByline attrs={attrs} />
@@ -328,7 +328,7 @@ export function DashboardSplit({ id, view }: DashboardSplitProps) {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col gap-3 p-6 md:gap-4 md:p-8 lg:h-dvh lg:gap-4 lg:overflow-hidden lg:p-10 xl:p-12">
+    <main className="flex min-h-dvh flex-col gap-3 p-4 md:gap-4 md:p-6 lg:h-dvh lg:gap-4 lg:overflow-hidden lg:p-8 xl:p-10">
       <header className="flex shrink-0 items-center justify-between gap-6">
         <Link
           href="/"
@@ -355,7 +355,7 @@ export function DashboardSplit({ id, view }: DashboardSplitProps) {
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-border lg:min-h-0">
+      <div className="flex flex-1 flex-col overflow-hidden rounded-sm border border-border lg:min-h-0">
         {view === "map" ? (
           <MapMode attrs={attrs} />
         ) : (

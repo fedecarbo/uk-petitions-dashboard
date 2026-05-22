@@ -13,8 +13,13 @@ export function Activity() {
   const [periodOffset, setPeriodOffset] = useState(0);
 
   return (
-    <div className="flex h-full flex-col">
-      <h2 className="mb-7 text-2xl font-semibold">Activity</h2>
+    <div className="flex h-full flex-col gap-5 lg:gap-6">
+      <div className="flex flex-col gap-1.5 border-b border-border pb-5 lg:pb-6">
+        <h2 className="text-3xl font-bold">Activity</h2>
+        <p className="text-base leading-snug text-muted-foreground/80">
+          See how signatures have built up over time.
+        </p>
+      </div>
 
       {/* Widget stack. Each widget carries `sectionShell`, whose `first:` rules
           drop the top divider on whichever widget is first — so the divider
@@ -33,11 +38,11 @@ export function Activity() {
             Another widget coming soon
           </div>
         </section>
-      </div>
 
-      {/* Spacer so the last section clears the scroll edge — overflow-auto
-          containers tend to clip bottom padding in WebKit. */}
-      <div aria-hidden className="h-8 shrink-0 md:h-12" />
+        {/* Spacer so the last section clears the scroll edge — overflow-auto
+            containers tend to clip bottom padding in WebKit. */}
+        <div aria-hidden className="h-8 shrink-0 md:h-12" />
+      </div>
     </div>
   );
 }

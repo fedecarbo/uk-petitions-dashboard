@@ -250,8 +250,8 @@ export function PetitionProgress({ attrs, onInteract }: PetitionProgressProps) {
 
   return (
     <div className="flex h-full flex-col gap-5 lg:gap-6">
-      <div className="flex flex-col gap-1.5">
-        <h2 className="text-2xl font-semibold">
+      <div className="flex flex-col gap-1.5 border-b border-border pb-5 lg:pb-6">
+        <h2 className="text-3xl font-bold">
           Petition progress
         </h2>
         <p className="text-base leading-snug text-muted-foreground/80">

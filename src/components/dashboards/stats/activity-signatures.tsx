@@ -374,17 +374,22 @@ export function ActivitySignaturesOverTime({
   const canDrill = range !== "day";
 
   return (
-    <section className={cn(sectionShell, "gap-4")}>
-      <SectionHeading>
-        Signatures over time{" "}
-        <span
-          className="font-normal text-muted-foreground/60"
-          title="Real captured timeline for petition 751472, used as a single example regardless of which petition is loaded."
-        >
-          (sample)
-        </span>
-      </SectionHeading>
+    <section className={cn(sectionShell, "gap-3")}>
+      {/* Title sits a little above the widget content (more space than the
+          content uses internally) so it reads as the section label. */}
+      <div className="mb-1">
+        <SectionHeading>
+          Signatures over time{" "}
+          <span
+            className="font-normal text-muted-foreground/60"
+            title="Real captured timeline for petition 751472, used as a single example regardless of which petition is loaded."
+          >
+            (sample)
+          </span>
+        </SectionHeading>
+      </div>
 
+      {/* Pick how to view the graph. */}
       <RangeToggle
         value={range}
         onChange={(v) => {
@@ -394,6 +399,7 @@ export function ActivitySignaturesOverTime({
         }}
       />
 
+      {/* The current period — switch it with the arrows — and its total. */}
       <div className="flex flex-col gap-1">
         <PeriodNavigator
           label={periodLabel(range, anchor)}
@@ -537,7 +543,7 @@ function NavButton({
     <Button
       type="button"
       variant="outline"
-      size="icon"
+      size="icon-lg"
       aria-label={ariaLabel}
       disabled={disabled}
       onClick={onClick}
@@ -568,7 +574,7 @@ function RangeToggle({
       // Bordered group with padding around gapped segments; the active one is a
       // solid dark fill (monochrome — no blue, no shadow), keeping the blue
       // accent for links, the map, and the data.
-      className="self-start rounded-md border p-0.5"
+      className="self-start rounded-md border p-0.5 dark:bg-input/30"
     >
       {RANGES.map((r) => (
         <ToggleGroupItem

@@ -55,12 +55,12 @@ export function ConstituencyBar({
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         onClick && "cursor-pointer hover:border-border",
         !onClick && interactive && "cursor-default",
-        isActive && "border-foreground/40 bg-foreground/[0.04]",
+        isActive && "border-primary/40 bg-primary/[0.06]",
       )}
     >
       <span
         aria-hidden
-        className="absolute inset-y-0 left-0 bg-foreground/[0.06]"
+        className="absolute inset-y-0 left-0 bg-primary/10"
         style={{ width: `${widthPct}%` }}
       />
       <div className="relative flex items-baseline justify-between gap-3 px-3 py-2 lg:px-4 lg:py-2.5">
