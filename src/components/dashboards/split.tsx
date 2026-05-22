@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { LiveIndicator } from "@/components/live-indicator";
@@ -77,7 +77,7 @@ function JourneyBar({ attrs }: { attrs: PetitionAttributes }) {
     : null;
 
   return (
-    <div className="flex flex-col gap-2 pt-2 md:gap-2.5 md:pt-3 lg:gap-3 lg:pt-4">
+    <div className="flex flex-col gap-2 md:gap-2.5 lg:gap-3">
       {sentence && (
         <p className="text-base font-medium text-muted-foreground">
           {sentence}
@@ -102,7 +102,7 @@ function JourneyBar({ attrs }: { attrs: PetitionAttributes }) {
         </div>
         <JourneyTick position={0.1} reached={responseReached} />
       </div>
-      <div className="relative h-3 md:h-4 lg:h-5 2xl:h-7">
+      <div className="relative h-5">
         <JourneyLabel
           position={0.1}
           label="10,000"
@@ -177,8 +177,10 @@ function PetitionDescription({
   expanded: boolean;
   onToggle: () => void;
 }) {
+  const [clampLines, setClampLines] = useState(0);
   const [overflowing, setOverflowing] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
 
   // Background and additional details read as one description; blank line between.
   const text = [background, additionalDetails]
@@ -186,45 +188,53 @@ function PetitionDescription({
     .filter(Boolean)
     .join("\n\n");
 
-  // While collapsed the text box flex-shrinks to fill the leftover panel height
-  // and clips; offer "Show more" only when it's actually cut off at that edge.
-  // (When expanded the whole panel scrolls instead — see StatsBody.)
+  // At lg+ the panel is a fixed height: the collapsed text fills the leftover space
+  // and is line-clamped to however many whole lines fit, so it ends with a clean "…"
+  // on a line boundary instead of a half-cut line. "Show more" shows only when the
+  // text is actually clamped. Below lg the page scrolls, so we don't clamp.
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const check = () => setOverflowing(el.scrollHeight - el.clientHeight > 1);
-    const observer = new ResizeObserver(check);
-    observer.observe(el);
+    if (expanded) return;
+    const box = boxRef.current;
+    const p = textRef.current;
+    if (!box || !p) return;
+    const measure = () => {
+      const lineHeight = parseFloat(getComputedStyle(p).lineHeight);
+      if (!lineHeight) return;
+      const available = box.clientHeight;
+      setClampLines(Math.max(1, Math.floor(available / lineHeight)));
+      setOverflowing(p.scrollHeight - available > 1);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(box);
     return () => observer.disconnect();
-  }, [text]);
+  }, [text, expanded]);
 
   if (!text) return null;
 
   const showToggle = expanded || overflowing;
+  const clamped = !expanded && clampLines > 0;
 
   return (
     <div
       className={cn(
         "flex max-w-3xl flex-col gap-2",
-        expanded ? "shrink-0" : "min-h-0",
+        expanded ? "lg:shrink-0" : "lg:min-h-0 lg:flex-1",
       )}
     >
       <div
-        ref={ref}
-        className={cn("relative", !expanded && "min-h-0 overflow-hidden")}
+        ref={boxRef}
+        className={cn(!expanded && "lg:min-h-0 lg:flex-1 lg:overflow-hidden")}
       >
-        <p className="whitespace-pre-line text-lg leading-snug text-muted-foreground">
+        <p
+          ref={textRef}
+          className={cn(
+            "whitespace-pre-line text-lg leading-snug text-muted-foreground",
+            clamped && "lg:line-clamp-[var(--clamp-lines)]",
+          )}
+          style={clamped ? ({ "--clamp-lines": clampLines } as CSSProperties) : undefined}
+        >
           {text}
         </p>
-        {!expanded && overflowing && (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-12"
-            style={{
-              background: "linear-gradient(to top, var(--background), transparent)",
-            }}
-          />
-        )}
       </div>
       {showToggle && (
         <button
@@ -245,16 +255,16 @@ function StatsBody({ attrs }: { attrs: PetitionAttributes }) {
 
   return (
     <div className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
-      <section className="flex min-w-0 flex-col border-b border-border lg:grid lg:grid-rows-[minmax(0,2fr)_minmax(0,1fr)] lg:border-b-0 lg:border-r lg:min-h-0 lg:overflow-hidden">
+      <section className="flex min-w-0 flex-col border-b border-border lg:grid lg:grid-rows-[minmax(0,1fr)_auto] lg:border-b-0 lg:border-r lg:min-h-0 lg:overflow-hidden">
         <div
           className={cn(
-            "flex flex-col gap-3 border-b border-border p-6 md:gap-4 md:p-8 lg:min-h-0 lg:p-8",
+            "flex flex-col gap-6 border-b border-border p-6 md:gap-8 md:p-8 lg:min-h-0 lg:p-8",
             descExpanded ? "no-scrollbar lg:overflow-y-auto" : "lg:overflow-hidden",
           )}
         >
           <div className="flex flex-col gap-3 md:gap-4 lg:shrink-0">
             <PetitionStatus state={attrs.state} />
-            <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-balance lg:text-6xl">
+            <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-balance lg:text-5xl wide:text-6xl">
               {attrs.action}
             </h1>
             <PetitionByline attrs={attrs} />
@@ -268,11 +278,11 @@ function StatsBody({ attrs }: { attrs: PetitionAttributes }) {
           />
         </div>
 
-        <div className="flex flex-col justify-center gap-2 p-6 md:gap-3 md:p-8 lg:min-h-0 lg:p-8">
+        <div className="flex flex-col gap-4 p-6 md:gap-5 md:p-8 lg:p-8">
           <div className="flex items-baseline gap-3 md:gap-4 lg:gap-5 2xl:gap-6">
             <span
               aria-label={`${signatureFormatter.format(attrs.signature_count)} signatures`}
-              className="font-mono text-4xl font-bold leading-none tracking-tight tabular-nums lg:text-6xl"
+              className="font-mono text-4xl font-bold leading-none tracking-tight tabular-nums lg:text-5xl wide:text-7xl"
             >
               {signatureFormatter.format(attrs.signature_count)}
             </span>

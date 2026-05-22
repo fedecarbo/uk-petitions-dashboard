@@ -70,11 +70,13 @@ To stay close to the GOV.UK (GDS) type scale, authored components use **only** t
 
 `text-base` (16, body floor) · `text-lg` (≈19) · `text-2xl` (24) · `text-3xl` (≈27) · `text-4xl` (36) · `text-5xl` (48) · `text-6xl` (60) · `text-7xl` (≈80, display).
 
-**All text is a single fixed size — do not add responsive size variants.** GDS uses a two-screen model, and only a few big titles scale. The **only** elements that carry a text-size breakpoint (a single small→large step at `lg`) are: the landing headline ([page.tsx](src/app/page.tsx)), the search input ([petition-search.tsx](src/components/petition-search.tsx)), and the stats-view petition title + hero count ([split.tsx](src/components/dashboards/split.tsx)). Everything else — including section headings, panel titles, the map/detail counts, body, labels, badges, captions — is one fixed size.
+**All text is a single fixed size — do not add responsive size variants.** GDS uses a two-screen model, and only a few big titles scale. The **only** elements that carry a text-size breakpoint (a single small→large step at `lg`) are the landing headline ([page.tsx](src/app/page.tsx)) and the search input ([petition-search.tsx](src/components/petition-search.tsx)). Everything else — including section headings, panel titles, the map/detail counts, body, labels, badges, captions — is one fixed size.
 
-Two exceptions only:
+**Stats-view hero — two steps, all on-scale.** The stats-view petition title and hero count ([split.tsx](src/components/dashboards/split.tsx)) step across **two** breakpoints (more than the single `lg` step above), but every size stays on the GDS scale: title `text-4xl` → `lg:text-5xl` → `wide:text-6xl` (36→48→60); count `text-4xl` → `lg:text-5xl` → `wide:text-7xl` (36→48→80, one step above the title so the count is the hero on a big screen). The `wide` breakpoint is a custom token in [globals.css](src/app/globals.css) — `--breakpoint-wide: 105rem` (1680px) — that exists so 60px appears **only on a large external display**, not on the 14" MacBook (1512px logical, where 60px feels too big). To retune where 60px kicks in, change that one token.
+
+Two further exceptions:
 - `text-sm` (14) — chart axis/tick labels that genuinely must be small. Not for badges, captions, or other chrome (those use the 16px floor).
-- `text-7xl` is the hero count's large size; `text-6xl` is currently unused but allowed.
+- `text-7xl` (≈80) is allowed for display.
 
 **Never** use `text-xs`, `text-xl`, `text-8xl`, `text-9xl`, or arbitrary `text-[Npx]`. The 18→24 gap in the subset is intentional and mirrors GDS's own 19→24 jump. This rule covers code we author — `src/components/ui/*` shadcn primitives keep their own size variants.
 

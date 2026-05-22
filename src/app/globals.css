@@ -53,6 +53,13 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@theme {
+  /* 1680px — above the MacBook 14" (1512px logical, where 60px feels too big),
+     below any 27" 4K external default (≥1920px, where 60px looks right).
+     Drives the `wide:` variant used only by the stats hero title. */
+  --breakpoint-wide: 105rem;
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.30 0.058 295);
