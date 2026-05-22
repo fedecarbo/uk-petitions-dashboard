@@ -40,7 +40,7 @@ export function StatCarousel({ attrs, className }: StatCarouselProps) {
 
   return (
     <div className={cn("flex flex-col bg-card", className)}>
-      <div className="shrink-0 border-b border-border">
+      <div className="shrink-0 border-b border-border bg-secondary/50 dark:bg-background">
         <div
           role="tablist"
           aria-label="Petition statistics"
@@ -62,7 +62,10 @@ export function StatCarousel({ attrs, className }: StatCarouselProps) {
                   idx > 0 && "border-l border-border",
                   isActive
                     ? "bg-card text-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                    : // Unselected: transparent (like the stats/map toggle's
+                      // unselected segments) — only the text colour and the
+                      // selected tab's fused fill distinguish them.
+                      "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {card.label}
