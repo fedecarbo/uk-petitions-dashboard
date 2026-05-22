@@ -329,14 +329,14 @@ export function DashboardSplit({ id, view }: DashboardSplitProps) {
 
   return (
     <main className="flex min-h-dvh flex-col gap-3 p-4 md:gap-4 md:p-6 lg:h-dvh lg:gap-4 lg:overflow-hidden lg:p-8 xl:p-10">
-      <header className="flex shrink-0 items-center justify-between gap-6">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 md:gap-6">
         <Link
           href="/"
-          className="text-base font-medium text-muted-foreground hover:text-foreground"
+          className="whitespace-nowrap text-base font-medium text-muted-foreground hover:text-foreground"
         >
           ← New search
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <a
             href="https://unboxed.co"
             target="_blank"

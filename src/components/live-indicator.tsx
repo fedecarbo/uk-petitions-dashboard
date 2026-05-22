@@ -34,7 +34,7 @@ export function LiveIndicator({
       : "Loading…";
 
   return (
-    <div className="flex items-center gap-2 text-base font-medium text-muted-foreground">
+    <div className="flex shrink-0 items-center gap-2 text-base font-medium text-muted-foreground">
       <span className="relative flex h-2 w-2 md:h-2.5 md:w-2.5">
         <span
           className={cn(
@@ -44,7 +44,7 @@ export function LiveIndicator({
         />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-live md:h-2.5 md:w-2.5" />
       </span>
-      {label}
+      <span className="hidden whitespace-nowrap md:inline">{label}</span>
     </div>
   );
 }

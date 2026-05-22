@@ -19,7 +19,7 @@ export function ViewToggle({ value, onChange }: ViewToggleProps) {
     <div
       role="tablist"
       aria-label="Dashboard view"
-      className="flex overflow-hidden rounded-md border border-border bg-muted text-base font-medium"
+      className="flex shrink-0 overflow-hidden rounded-md border border-border bg-muted text-base font-medium"
     >
       {OPTIONS.map((option, idx) => {
         const active = option.value === value;
