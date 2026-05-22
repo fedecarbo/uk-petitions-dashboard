@@ -4,11 +4,13 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { signatureFormatter } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   PETITION_TIMELINE_META,
   sumInRange,
 } from "@/lib/petition-timeline";
-import { SampleBadge, SectionHeading, sectionShell } from "./section-heading";
+import { SectionHeading, sectionShell } from "./section-heading";
 
 export type Range = "day" | "week" | "month" | "sixMonths";
 
@@ -373,10 +375,15 @@ export function ActivitySignaturesOverTime({
 
   return (
     <section className={cn(sectionShell, "gap-4")}>
-      <div className="flex items-center justify-between gap-2">
-        <SectionHeading>Signatures over time</SectionHeading>
-        <SampleBadge />
-      </div>
+      <SectionHeading>
+        Signatures over time{" "}
+        <span
+          className="font-normal text-muted-foreground/60"
+          title="Real captured timeline for petition 751472, used as a single example regardless of which petition is loaded."
+        >
+          (sample)
+        </span>
+      </SectionHeading>
 
       <RangeToggle
         value={range}
@@ -501,14 +508,14 @@ function PeriodNavigator({
           disabled={!canStepBack}
           onClick={onStepBack}
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft />
         </NavButton>
         <NavButton
           ariaLabel="Next period"
           disabled={!canStepForward}
           onClick={onStepForward}
         >
-          <ChevronRight size={16} />
+          <ChevronRight />
         </NavButton>
       </div>
     </div>
@@ -527,20 +534,16 @@ function NavButton({
   children: React.ReactNode;
 }) {
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="icon"
       aria-label={ariaLabel}
       disabled={disabled}
       onClick={onClick}
-      className={cn(
-        "inline-flex size-7 items-center justify-center rounded-md border border-border/70 text-muted-foreground transition-colors",
-        disabled
-          ? "cursor-not-allowed opacity-40"
-          : "hover:bg-muted/50 hover:text-foreground",
-      )}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -552,32 +555,29 @@ function RangeToggle({
   onChange: (r: Range) => void;
 }) {
   return (
-    <div
-      role="tablist"
+    <ToggleGroup
       aria-label="Time range"
-      className="inline-flex self-start rounded-md border border-border/70 bg-card p-0.5"
+      variant="outline"
+      spacing={0}
+      value={[value]}
+      // Single-select: keep one range always selected — ignore the change if
+      // clicking the active item would empty the group.
+      onValueChange={(next) => {
+        if (next[0]) onChange(next[0] as Range);
+      }}
+      className="self-start"
     >
-      {RANGES.map((r) => {
-        const active = r.id === value;
-        return (
-          <button
-            key={r.id}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onChange(r.id)}
-            className={cn(
-              "rounded-[5px] px-2.5 py-1 text-base font-medium transition-colors md:px-3",
-              active
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-            )}
-          >
-            {r.label}
-          </button>
-        );
-      })}
-    </div>
+      {RANGES.map((r) => (
+        <ToggleGroupItem
+          key={r.id}
+          value={r.id}
+          // Keep the brand selection colour (green), not the default muted grey.
+          className="text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary aria-pressed:hover:text-primary-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+        >
+          {r.label}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
   );
 }
 

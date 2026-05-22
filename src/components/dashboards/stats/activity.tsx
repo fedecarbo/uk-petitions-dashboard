@@ -1,54 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import type { PetitionAttributes } from "@/lib/petitions-api";
-import { ActivityHighlights } from "@/components/dashboards/stats/activity-highlights";
+import { cn } from "@/lib/utils";
 import {
   ActivitySignaturesOverTime,
-  dayOffsetFrom,
-  monthOffsetFrom,
   type Range,
 } from "@/components/dashboards/stats/activity-signatures";
-import { ActivityGeography } from "@/components/dashboards/stats/activity-geography";
-import { ActivityContext } from "@/components/dashboards/stats/activity-context";
-import { PETITION_TIMELINE_META } from "@/lib/petition-timeline";
+import { sectionShell } from "@/components/dashboards/stats/section-heading";
 
-interface ActivityProps {
-  attrs: PetitionAttributes;
-}
-
-export function Activity({ attrs }: ActivityProps) {
+export function Activity() {
   const [range, setRange] = useState<Range>("day");
   const [periodOffset, setPeriodOffset] = useState(0);
 
-  const focusDay = (ts: number) => {
-    setRange("day");
-    setPeriodOffset(dayOffsetFrom(PETITION_TIMELINE_META.captured_at, ts));
-  };
-  const focusMonth = (ts: number) => {
-    setRange("month");
-    setPeriodOffset(monthOffsetFrom(PETITION_TIMELINE_META.captured_at, ts));
-  };
-
   return (
     <div className="flex h-full flex-col">
-      <h2 className="mb-7 text-2xl font-semibold">
-        Activity
-      </h2>
+      <h2 className="mb-7 text-2xl font-semibold">Activity</h2>
 
-      <ActivityHighlights
-        attrs={attrs}
-        onFocusDay={focusDay}
-        onFocusMonth={focusMonth}
-      />
-      <ActivitySignaturesOverTime
-        range={range}
-        setRange={setRange}
-        periodOffset={periodOffset}
-        setPeriodOffset={setPeriodOffset}
-      />
-      <ActivityGeography attrs={attrs} />
-      <ActivityContext attrs={attrs} />
+      {/* Widget stack. Each widget carries `sectionShell`, whose `first:` rules
+          drop the top divider on whichever widget is first — so the divider
+          only ever appears *between* widgets, never above the first one. */}
+      <div className="flex flex-col">
+        <ActivitySignaturesOverTime
+          range={range}
+          setRange={setRange}
+          periodOffset={periodOffset}
+          setPeriodOffset={setPeriodOffset}
+        />
+
+        {/* Placeholder slot for the next widget — remove when real content lands. */}
+        <section className={cn(sectionShell, "gap-4")}>
+          <div className="flex h-24 items-center justify-center rounded-md border border-dashed border-border/70 text-base text-muted-foreground/70 md:h-28">
+            Another widget coming soon
+          </div>
+        </section>
+      </div>
 
       {/* Spacer so the last section clears the scroll edge — overflow-auto
           containers tend to clip bottom padding in WebKit. */}
