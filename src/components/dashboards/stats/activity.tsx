@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import type { PetitionAttributes } from "@/lib/petitions-api";
 import {
   ActivitySignaturesOverTime,
   type Range,
 } from "@/components/dashboards/stats/activity-signatures";
+import { Highlights } from "@/components/dashboards/stats/activity-highlights";
 import { sectionShell } from "@/components/dashboards/stats/section-heading";
 
-export function Activity() {
+export function Activity({ attrs }: { attrs: PetitionAttributes }) {
   const [range, setRange] = useState<Range>("day");
   const [periodOffset, setPeriodOffset] = useState(0);
 
@@ -25,6 +27,8 @@ export function Activity() {
           drop the top divider on whichever widget is first — so the divider
           only ever appears *between* widgets, never above the first one. */}
       <div className="flex flex-col">
+        <Highlights attrs={attrs} />
+
         <ActivitySignaturesOverTime
           range={range}
           setRange={setRange}
