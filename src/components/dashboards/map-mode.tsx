@@ -85,7 +85,7 @@ export function MapMode({ attrs }: MapModeProps) {
     <div className="grid flex-1 gap-3 md:gap-4 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
       <section
         aria-label="Constituency map"
-        className="relative min-h-[360px] min-w-0 overflow-hidden rounded-sm border border-border lg:min-h-0"
+        className="relative min-h-[480px] min-w-0 overflow-hidden rounded-sm border border-border lg:min-h-0"
       >
         <UKConstituencyMap
           ref={mapRef}
