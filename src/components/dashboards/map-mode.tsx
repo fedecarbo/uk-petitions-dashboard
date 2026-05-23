@@ -82,7 +82,7 @@ export function MapMode({ attrs }: MapModeProps) {
     : null;
 
   return (
-    <div className="grid flex-1 gap-3 md:gap-4 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
+    <div className="grid flex-1 gap-3 md:gap-4 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-5 lg:overflow-hidden xl:gap-6">
       <section
         aria-label="Constituency map"
         className="relative min-h-[480px] min-w-0 overflow-hidden rounded-sm border border-border lg:min-h-0"
@@ -102,16 +102,16 @@ export function MapMode({ attrs }: MapModeProps) {
       >
         <section
           aria-label="Petition identity"
-          className="flex flex-col gap-3 border-b border-border p-6 md:gap-4 md:p-8 lg:shrink-0 lg:gap-4 lg:p-8"
+          className="flex flex-col gap-3 border-b border-border p-6 md:gap-4 md:p-8 lg:shrink-0"
         >
           <PetitionStatus state={attrs.state} />
-          <h1 className="text-2xl leading-tight font-semibold tracking-tight text-balance">
+          <h1 className="text-2xl leading-[1.1] font-bold tracking-tight text-balance">
             {attrs.action}
           </h1>
           <div className="flex items-baseline gap-2 lg:gap-3">
             <span
               aria-label={`${signatureFormatter.format(attrs.signature_count)} signatures`}
-              className="font-mono text-5xl font-bold tracking-tight tabular-nums leading-none"
+              className="font-mono text-4xl font-bold tracking-tight tabular-nums leading-none"
             >
               {signatureFormatter.format(attrs.signature_count)}
             </span>

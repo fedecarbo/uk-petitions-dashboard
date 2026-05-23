@@ -281,7 +281,7 @@ function StatsBody({ attrs }: { attrs: PetitionAttributes }) {
   const [descExpanded, setDescExpanded] = useState(false);
 
   return (
-    <div className="grid flex-1 gap-3 md:gap-4 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:overflow-hidden">
+    <div className="grid flex-1 gap-3 md:gap-4 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-5 lg:overflow-hidden xl:gap-6">
       <section className="flex min-w-0 flex-col overflow-hidden rounded-sm border border-border lg:grid lg:grid-rows-[minmax(0,1fr)_auto] lg:min-h-0">
         <div
           className={cn(
