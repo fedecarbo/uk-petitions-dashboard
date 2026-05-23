@@ -23,13 +23,10 @@ import {
 } from "d3-zoom";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 import {
-  BIN_BG_CLASS,
-  BIN_FILL_CLASS,
-  buildBinScale,
+  buildIntensityScale,
   loadConstituencies,
   loadDetailedConstituencies,
-  type BinLabel,
-  type BinScale,
+  type IntensityScale,
   type ConstituencyCollection,
   type ConstituencyFeature,
 } from "@/lib/uk-constituencies";
@@ -46,9 +43,11 @@ interface UKConstituencyMapProps {
     name: string;
     signature_count: number;
   }>;
-  activeCode: string | null;
-  onActiveChange: Dispatch<SetStateAction<string | null>>;
+  hoverCode: string | null;
+  selectedCode: string | null;
+  onHoverChange: Dispatch<SetStateAction<string | null>>;
   onSelect?: (code: string) => void;
+  onDeselect?: () => void;
   ref?: Ref<UKConstituencyMapHandle>;
 }
 
@@ -96,9 +95,11 @@ function prepareFeatures(collection: ConstituencyCollection): PreparedPath[] {
 
 export function UKConstituencyMap({
   signaturesByConstituency,
-  activeCode,
-  onActiveChange,
+  hoverCode,
+  selectedCode,
+  onHoverChange,
   onSelect,
+  onDeselect,
   ref,
 }: UKConstituencyMapProps) {
   const [paths, setPaths] = useState<PreparedPath[] | null>(null);
@@ -107,6 +108,7 @@ export function UKConstituencyMap({
 
   const svgRef = useRef<SVGSVGElement>(null);
   const groupRef = useRef<SVGGElement>(null);
+  const overlayRef = useRef<SVGGElement>(null);
   const zoomRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
   const detailRequested = useRef(false);
 
@@ -186,7 +188,9 @@ export function UKConstituencyMap({
       })
       .on("zoom", (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
         const t: ZoomTransform = event.transform;
-        groupEl.setAttribute("transform", t.toString());
+        const transform = t.toString();
+        groupEl.setAttribute("transform", transform);
+        overlayRef.current?.setAttribute("transform", transform);
         setZoomLevel(t.k);
       });
 
@@ -247,10 +251,10 @@ export function UKConstituencyMap({
           .transition()
           .duration(600)
           .call(zoomRef.current.transform, transform);
-        onActiveChange(code);
+        onHoverChange(code);
       },
     }),
-    [paths, onActiveChange],
+    [paths, onHoverChange],
   );
 
   const lookup = useMemo(() => {
@@ -261,11 +265,12 @@ export function UKConstituencyMap({
     return m;
   }, [signaturesByConstituency]);
 
-  const binScale = useMemo<BinScale>(
-    () => buildBinScale(signaturesByConstituency),
+  const intensityScale = useMemo<IntensityScale>(
+    () => buildIntensityScale(signaturesByConstituency.map((c) => c.signature_count)),
     [signaturesByConstituency],
   );
 
+  const activeCode = selectedCode ?? hoverCode;
   const activeInfo = activeCode
     ? (() => {
         const pathEntry = paths?.find((p) => p.code === activeCode);
@@ -346,20 +351,38 @@ export function UKConstituencyMap({
           aria-keyshortcuts="Plus Minus 0 ArrowUp ArrowDown ArrowLeft ArrowRight"
           tabIndex={0}
           onKeyDown={handleKeyDown}
+          onClick={(event) => {
+            // Click on the SVG background (not on a constituency path) clears
+            // selection. Path clicks bubble here too, but they hit a <path>
+            // child rather than the svg element itself, so we filter on that.
+            if (event.target === event.currentTarget) onDeselect?.();
+          }}
         >
-          <g ref={groupRef} className="stroke-border" strokeWidth={0.4}>
+          <g
+            ref={groupRef}
+            className={cn(
+              "stroke-muted dark:stroke-background transition-opacity duration-200",
+              selectedCode && "opacity-50",
+            )}
+            strokeWidth={0.4}
+          >
             {paths.map((p) => (
               <ChoroplethPath
                 key={p.code}
                 path={p}
                 lookup={lookup}
-                binScale={binScale}
-                activeCode={activeCode}
-                setActiveCode={onActiveChange}
+                intensityScale={intensityScale}
+                setHoverCode={onHoverChange}
                 onSelect={onSelect}
               />
             ))}
           </g>
+          <SelectionOverlay
+            ref={overlayRef}
+            paths={paths}
+            hoverCode={hoverCode}
+            selectedCode={selectedCode}
+          />
         </svg>
       </div>
 
@@ -368,7 +391,10 @@ export function UKConstituencyMap({
         reset, arrow keys to pan.
       </span>
 
-      <Legend labels={binScale.labels} />
+      <Legend
+        minLabel={intensityScale.minLabel}
+        maxLabel={intensityScale.maxLabel}
+      />
 
       <ZoomControls
         zoomedIn={zoomedIn}
@@ -394,45 +420,88 @@ export function UKConstituencyMap({
 interface ChoroplethPathProps {
   path: PreparedPath;
   lookup: Map<string, { count: number; name: string }>;
-  binScale: BinScale;
-  activeCode: string | null;
-  setActiveCode: Dispatch<SetStateAction<string | null>>;
+  intensityScale: IntensityScale;
+  setHoverCode: Dispatch<SetStateAction<string | null>>;
   onSelect?: (code: string) => void;
 }
 
 function ChoroplethPath({
   path,
   lookup,
-  binScale,
-  activeCode,
-  setActiveCode,
+  intensityScale,
+  setHoverCode,
   onSelect,
 }: ChoroplethPathProps) {
   const data = lookup.get(path.code);
   const count = data?.count ?? 0;
-  const bin = binScale.binFor(count);
-  const isActive = path.code === activeCode;
+  const intensity = intensityScale.intensityFor(count);
+  // Unsigned constituencies use the muted background fill so they blend with
+  // the map area; signed ones use --primary at the computed log opacity.
+  const fillClass = count > 0 ? "fill-primary" : "fill-muted";
   return (
     <path
       d={path.d}
-      className={cn(
-        BIN_FILL_CLASS[bin],
-        "transition-[stroke-width] duration-100",
-        isActive && "stroke-foreground",
-        onSelect && "cursor-pointer",
-      )}
-      strokeWidth={isActive ? 1.2 : 0.4}
+      className={cn(fillClass, onSelect && "cursor-pointer")}
+      style={count > 0 ? { fillOpacity: intensity } : undefined}
+      strokeWidth={0.4}
       vectorEffect="non-scaling-stroke"
-      onMouseEnter={() => setActiveCode(path.code)}
-      onMouseLeave={() =>
-        setActiveCode((c) => (c === path.code ? null : c))
-      }
-      onFocus={() => setActiveCode(path.code)}
-      onBlur={() => setActiveCode((c) => (c === path.code ? null : c))}
+      onMouseEnter={() => setHoverCode(path.code)}
+      onMouseLeave={() => setHoverCode((c) => (c === path.code ? null : c))}
+      onFocus={() => setHoverCode(path.code)}
+      onBlur={() => setHoverCode((c) => (c === path.code ? null : c))}
       onClick={onSelect ? () => onSelect(path.code) : undefined}
     >
       <title>{`${path.name}: ${signatureFormatter.format(count)} signatures`}</title>
     </path>
+  );
+}
+
+interface SelectionOverlayProps {
+  paths: PreparedPath[];
+  hoverCode: string | null;
+  selectedCode: string | null;
+  ref?: Ref<SVGGElement>;
+}
+
+function SelectionOverlay({
+  paths,
+  hoverCode,
+  selectedCode,
+  ref,
+}: SelectionOverlayProps) {
+  const hover =
+    hoverCode && hoverCode !== selectedCode
+      ? paths.find((p) => p.code === hoverCode)
+      : null;
+  const selected = selectedCode
+    ? paths.find((p) => p.code === selectedCode)
+    : null;
+  return (
+    <g
+      ref={ref}
+      className="pointer-events-none transition-opacity duration-150"
+    >
+      {hover && (
+        <path
+          d={hover.d}
+          fill="none"
+          className="stroke-foreground"
+          strokeWidth={1}
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      )}
+      {selected && (
+        <path
+          d={selected.d}
+          fill="none"
+          className="stroke-foreground"
+          strokeWidth={1.5}
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      )}
+    </g>
   );
 }
 
@@ -518,24 +587,22 @@ function ZoomButton({
   );
 }
 
-function Legend({ labels }: { labels: BinLabel[] }) {
+function Legend({ minLabel, maxLabel }: { minLabel: string; maxLabel: string }) {
   return (
     <div className="pointer-events-none absolute bottom-3 left-3 flex flex-col gap-1.5 rounded-md border border-border bg-card/95 px-2.5 py-2 text-base text-muted-foreground backdrop-blur">
       <p className="font-medium text-foreground">Signatures</p>
-      <ul className="flex flex-col gap-1">
-        {labels.map((entry) => (
-          <li key={entry.bin} className="flex items-center gap-2">
-            <span
-              aria-hidden
-              className={cn(
-                "block h-3 w-4 shrink-0 rounded-sm border border-border/40 lg:h-3.5 lg:w-5",
-                BIN_BG_CLASS[entry.bin],
-              )}
-            />
-            <span className="font-mono tabular-nums">{entry.label}</span>
-          </li>
-        ))}
-      </ul>
+      <div
+        aria-hidden
+        className="h-2 w-32 rounded-sm border border-border/40"
+        style={{
+          background:
+            "linear-gradient(to right, color-mix(in oklab, var(--primary) 25%, transparent), var(--primary))",
+        }}
+      />
+      <div className="flex justify-between font-mono tabular-nums text-muted-foreground">
+        <span>{minLabel}</span>
+        <span>{maxLabel}</span>
+      </div>
     </div>
   );
 }

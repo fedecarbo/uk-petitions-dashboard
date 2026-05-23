@@ -20,7 +20,6 @@ import {
   type UKConstituencyMapHandle,
 } from "@/components/dashboards/uk-constituency-map";
 import { signatureFormatter } from "@/lib/format";
-import { buildBinScale } from "@/lib/uk-constituencies";
 import type { PetitionAttributes } from "@/lib/petitions-api";
 
 interface MapModeProps {
@@ -55,8 +54,6 @@ export function MapMode({ attrs }: MapModeProps) {
     [constituencies],
   );
 
-  const binScale = useMemo(() => buildBinScale(constituencies), [constituencies]);
-
   const [hoverCode, setHoverCode] = useState<string | null>(null);
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const mapRef = useRef<UKConstituencyMapHandle>(null);
@@ -85,14 +82,16 @@ export function MapMode({ attrs }: MapModeProps) {
     <div className="grid flex-1 gap-3 md:gap-4 lg:min-h-0 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-5 lg:overflow-hidden xl:gap-6">
       <section
         aria-label="Constituency map"
-        className="relative min-h-[480px] min-w-0 overflow-hidden rounded-sm border border-border lg:min-h-0"
+        className="relative min-h-[480px] min-w-0 overflow-hidden rounded-sm border border-border bg-muted dark:bg-transparent lg:min-h-0"
       >
         <UKConstituencyMap
           ref={mapRef}
           signaturesByConstituency={constituencies}
-          activeCode={effectiveActive}
-          onActiveChange={setHoverCode}
+          hoverCode={hoverCode}
+          selectedCode={selectedCode}
+          onHoverChange={setHoverCode}
           onSelect={toggleSelect}
+          onDeselect={() => setSelectedCode(null)}
         />
       </section>
 
@@ -138,9 +137,6 @@ export function MapMode({ attrs }: MapModeProps) {
                     totalConstituencySignatures
                   : null
               }
-              binLabel={binLabelFor(
-                binScale.binFor(selectedConstituency.signature_count),
-              )}
               onBack={() => setSelectedCode(null)}
               onZoomHere={() =>
                 mapRef.current?.focusConstituency(selectedConstituency.ons_code)
@@ -237,20 +233,3 @@ function DefaultView({
   );
 }
 
-function binLabelFor(bin: number): string | null {
-  switch (bin) {
-    case 5:
-      return "Top 20% by signatures";
-    case 4:
-      return "Top 21–40%";
-    case 3:
-      return "Top 41–60%";
-    case 2:
-      return "Top 61–80%";
-    case 1:
-      return "Bottom 20% of signed";
-    case 0:
-    default:
-      return null;
-  }
-}

@@ -1,4 +1,3 @@
-import { scaleQuantile } from "d3-scale";
 import { feature } from "topojson-client";
 import type { Feature, FeatureCollection, Geometry } from "geojson";
 import type {
@@ -45,75 +44,69 @@ export function loadDetailedConstituencies(): Promise<ConstituencyCollection> {
   return detailedCache;
 }
 
-export const BIN_FILL_CLASS: Record<number, string> = {
-  0: "fill-muted",
-  1: "fill-primary/15",
-  2: "fill-primary/30",
-  3: "fill-primary/50",
-  4: "fill-primary/75",
-  5: "fill-primary",
-};
-
-// HTML equivalent for swatches in the legend etc. — `fill-*` is an SVG-only
-// CSS property, so spans need `bg-*` to render the same colour.
-export const BIN_BG_CLASS: Record<number, string> = {
-  0: "bg-muted",
-  1: "bg-primary/15",
-  2: "bg-primary/30",
-  3: "bg-primary/50",
-  4: "bg-primary/75",
-  5: "bg-primary",
-};
-
-export interface BinLabel {
-  label: string;
-  bin: number;
+export interface IntensityScale {
+  // Returns 0 for unsigned, otherwise a number in [floor, 1] indicating how
+  // saturated the choropleth fill should be for the given count.
+  intensityFor: (count: number) => number;
+  min: number;
+  max: number;
+  minLabel: string;
+  maxLabel: string;
 }
 
-export interface BinScale {
-  binFor: (count: number) => number;
-  labels: BinLabel[];
-}
+// Floor opacity so even the lowest signed constituency is visibly tinted
+// against the muted map background.
+const INTENSITY_FLOOR = 0.25;
 
-// Adaptive (quantile) bins. With fixed thresholds the choropleth washes out
-// for small petitions and saturates for viral ones; quantile bins partition
-// the actual distribution into 5 equal-size groups so the map always shows
-// meaningful variation. Bin 0 is reserved for unsigned constituencies.
-export function buildBinScale(
-  signatures: Array<{ signature_count: number }>,
-): BinScale {
-  const signed = signatures
-    .map((s) => s.signature_count)
-    .filter((n) => n > 0);
+// Continuous log-scaled intensity. Each constituency gets a unique opacity
+// computed from its position on the log distribution between min and max
+// positive values. Log scale handles the heavy right-skew of petition data —
+// orders-of-magnitude differences map to perceptible visual differences
+// instead of being lumped into a single discrete top bin. Returns 0 for
+// non-positive values so the path renders as `fill-muted` (background colour).
+export function buildIntensityScale(
+  values: number[],
+  formatLabel: (value: number) => string = (v) => signatureFormatter.format(v),
+): IntensityScale {
+  const positive = values.filter((n) => n > 0);
 
-  if (signed.length === 0) {
+  if (positive.length === 0) {
     return {
-      binFor: () => 0,
-      labels: [{ label: "0", bin: 0 }],
+      intensityFor: () => 0,
+      min: 0,
+      max: 0,
+      minLabel: formatLabel(0),
+      maxLabel: formatLabel(0),
     };
   }
 
-  const scale = scaleQuantile<number>().domain(signed).range([1, 2, 3, 4, 5]);
+  const min = Math.min(...positive);
+  const max = Math.max(...positive);
 
-  const sorted = [...signed].sort((a, b) => a - b);
-  const min = sorted[0];
-  const max = sorted[sorted.length - 1];
-  const quantiles = scale.quantiles();
-
-  const labels: BinLabel[] = [{ label: "0", bin: 0 }];
-  const boundaries = [min, ...quantiles, max + 1];
-  for (let i = 0; i < 5; i++) {
-    const lo = Math.ceil(boundaries[i]);
-    const hi = i === 4 ? max : Math.floor(boundaries[i + 1]) - 1;
-    const label =
-      lo >= hi
-        ? signatureFormatter.format(lo)
-        : `${signatureFormatter.format(lo)}–${signatureFormatter.format(hi)}`;
-    labels.push({ label, bin: i + 1 });
+  if (min === max) {
+    return {
+      intensityFor: (v) => (v <= 0 ? 0 : 1),
+      min,
+      max,
+      minLabel: formatLabel(min),
+      maxLabel: formatLabel(max),
+    };
   }
 
+  const logMin = Math.log(min);
+  const logMax = Math.log(max);
+  const span = logMax - logMin;
+
   return {
-    binFor: (count) => (count <= 0 ? 0 : scale(count)),
-    labels,
+    intensityFor: (v) => {
+      if (v <= 0) return 0;
+      if (v >= max) return 1;
+      const t = (Math.log(v) - logMin) / span;
+      return INTENSITY_FLOOR + (1 - INTENSITY_FLOOR) * Math.max(0, Math.min(1, t));
+    },
+    min,
+    max,
+    minLabel: formatLabel(min),
+    maxLabel: formatLabel(max),
   };
 }

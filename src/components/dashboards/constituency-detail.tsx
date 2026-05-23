@@ -20,7 +20,6 @@ interface ConstituencyDetailProps {
   rank: number | null;
   totalSigned: number;
   share: number | null;
-  binLabel: string | null;
   onBack: () => void;
   onZoomHere: () => void;
 }
@@ -38,7 +37,6 @@ export function ConstituencyDetail({
   rank,
   totalSigned,
   share,
-  binLabel,
   onBack,
   onZoomHere,
 }: ConstituencyDetailProps) {
@@ -87,7 +85,6 @@ export function ConstituencyDetail({
           {share !== null && (
             <Fact label="Share" value={`${percentFormatter.format(share)} of UK total`} />
           )}
-          {binLabel && <Fact label="Bin" value={binLabel} />}
         </dl>
       ) : (
         <p className="text-base text-muted-foreground">
